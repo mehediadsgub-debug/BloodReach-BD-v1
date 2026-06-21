@@ -1,0 +1,44 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-base);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 3);
+  background: var(--color-secondary);
+  color: #fff;
+}
+
+main {
+  padding: calc(var(--spacing-unit) * 3);
+}
+
+input, select, button {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+input, select {
+  display: block;
+  width: 100%;
+  padding: var(--spacing-unit);
+  margin-bottom: var(--spacing-unit);
+  border: 1px solid #ddd;
+  border-radius: var(--radius-base);
+}

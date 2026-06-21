@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seeker Dashboard — Blood Reach BD</title>
+  <link rel="stylesheet" href="assets/css/variables.css" />
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/components.css" />
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
+  <link rel="stylesheet" href="assets/css/responsive.css" />
+</head>
+<body>
+  <header>
+    <h1>Seeker Dashboard</h1>
+    <div id="notification-bell"></div>
+  </header>
+
+  <main class="dashboard-grid">
+    <section class="card">
+      <h2>New Blood Request</h2>
+      <form id="request-form">
+        <select id="blood-group" required>
+          <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+          <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
+        </select>
+        <input type="number" id="quantity-units" placeholder="Units needed" min="1" required />
+        <select id="urgency-level" required>
+          <option value="LOW">Low</option>
+          <option value="MEDIUM">Medium</option>
+          <option value="HIGH">High</option>
+          <option value="CRITICAL">Critical</option>
+        </select>
+        <!-- TODO: district_id dropdown -->
+        <button class="btn" type="submit">Submit Request</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Nearby Donors</h2>
+      <div id="donor-results"><!-- TODO: render matched donors --></div>
+    </section>
+  </main>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/seeker.js"></script>
+  <script src="assets/js/notifications.js"></script>
+  <script>
+    document.getElementById("request-form").addEventListener("submit", submitBloodRequest);
+  </script>
+</body>
+</html>

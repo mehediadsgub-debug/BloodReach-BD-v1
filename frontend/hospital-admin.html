@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hospital Admin Panel — Blood Reach BD</title>
+  <link rel="stylesheet" href="assets/css/variables.css" />
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/components.css" />
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
+  <link rel="stylesheet" href="assets/css/responsive.css" />
+</head>
+<body>
+  <header>
+    <h1>Hospital Admin Panel</h1>
+    <div id="notification-bell"></div>
+  </header>
+
+  <main class="dashboard-grid">
+    <section class="card">
+      <h2>Blood Inventory</h2>
+      <table id="inventory-table">
+        <thead><tr><th>Blood Group</th><th>Units</th><th>Action</th></tr></thead>
+        <tbody><!-- TODO: render inventory rows from /hospitals/{id}/inventory --></tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Pending Requests</h2>
+      <div id="pending-requests"><!-- TODO: approve/reject blood requests --></div>
+    </section>
+  </main>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/hospital.js"></script>
+  <script src="assets/js/notifications.js"></script>
+</body>
+</html>

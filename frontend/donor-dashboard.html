@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Donor Dashboard — Blood Reach BD</title>
+  <link rel="stylesheet" href="assets/css/variables.css" />
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/components.css" />
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
+  <link rel="stylesheet" href="assets/css/responsive.css" />
+</head>
+<body>
+  <header>
+    <h1>Donor Dashboard</h1>
+    <div id="notification-bell"><!-- TODO: notification bell component --></div>
+  </header>
+
+  <main class="dashboard-grid">
+    <section class="card">
+      <h2>Availability</h2>
+      <label><input type="checkbox" id="availability-toggle" /> Available to donate</label>
+    </section>
+
+    <section class="card">
+      <h2>Donation History</h2>
+      <ul id="donation-history"><!-- TODO: render donation history --></ul>
+    </section>
+  </main>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/donor.js"></script>
+  <script src="assets/js/notifications.js"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register — Blood Reach BD</title>
+  <link rel="stylesheet" href="assets/css/variables.css" />
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/components.css" />
+  <link rel="stylesheet" href="assets/css/responsive.css" />
+</head>
+<body>
+  <main class="card">
+    <h2>Register</h2>
+    <form id="register-form">
+      <input type="text" id="name" placeholder="Full Name" required />
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <select id="role" required>
+        <option value="DONOR">Donor</option>
+        <option value="SEEKER">Seeker</option>
+        <option value="HOSPITAL_ADMIN">Hospital Admin</option>
+      </select>
+      <!-- TODO: district_id dropdown populated from GET /locations/districts -->
+      <button class="btn" type="submit">Create Account</button>
+    </form>
+  </main>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script>
+    document.getElementById("register-form").addEventListener("submit", handleRegister);
+  </script>
+</body>
+</html>
