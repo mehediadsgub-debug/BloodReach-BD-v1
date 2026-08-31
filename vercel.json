@@ -25,11 +25,11 @@
       "dest": "/api/index.py"
     },
     {
-      "src": "/assets/(.*)",
-      "dest": "/frontend/assets/$1"
+      "src": "/",
+      "dest": "/frontend/index.html"
     },
     {
-      "src": "/",
+      "src": "/index.html",
       "dest": "/frontend/index.html"
     },
     {
@@ -37,7 +37,15 @@
       "dest": "/frontend/login.html"
     },
     {
+      "src": "/login.html",
+      "dest": "/frontend/login.html"
+    },
+    {
       "src": "/register",
+      "dest": "/frontend/register.html"
+    },
+    {
+      "src": "/register.html",
       "dest": "/frontend/register.html"
     },
     {
@@ -45,7 +53,15 @@
       "dest": "/frontend/dashboard-donor.html"
     },
     {
+      "src": "/dashboard-donor.html",
+      "dest": "/frontend/dashboard-donor.html"
+    },
+    {
       "src": "/dashboard-seeker",
+      "dest": "/frontend/dashboard-seeker.html"
+    },
+    {
+      "src": "/dashboard-seeker.html",
       "dest": "/frontend/dashboard-seeker.html"
     },
     {
@@ -53,8 +69,20 @@
       "dest": "/frontend/dashboard-admin.html"
     },
     {
+      "src": "/dashboard-admin.html",
+      "dest": "/frontend/dashboard-admin.html"
+    },
+    {
       "src": "/dashboard-hospital",
       "dest": "/frontend/dashboard-hospital.html"
+    },
+    {
+      "src": "/dashboard-hospital.html",
+      "dest": "/frontend/dashboard-hospital.html"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "/frontend/assets/$1"
     },
     {
       "src": "/(.*)",
