@@ -2,20 +2,7 @@
   "name": "bloodreach-bd",
   "version": "1.0.0",
   "description": "BloodReach BD — Real-Time Blood Availability & Donor Matching Platform for Bangladesh",
-  "scripts": {
-    "build": "echo 'Static build ready'",
-    "start": "python -m http.server 3000",
-    "frontend": "python -m http.server 3000",
-    "backend": "python -m uvicorn backend.main:app --reload --port 8000",
-    "test": "pytest backend/tests -v",
-    "setup-db": "python backend/setup_db.py"
-  },
-  "keywords": [
-    "blood-donation",
-    "bangladesh",
-    "fastapi",
-    "bloodreach"
-  ],
+  "private": true,
   "author": "MD. MAHEDI HASAN",
   "license": "MIT"
 }
