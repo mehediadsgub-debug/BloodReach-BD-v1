@@ -152,13 +152,46 @@ def health_check():
     }
 
 
-# ── Mount Frontend Static Files ──────────────────────────
-# Automatically serve frontend HTML/CSS/JS directly on http://localhost:8000
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-frontend_dir = os.path.join(BASE_DIR, "frontend")
+# ── Mount Frontend Static Files & Routes ───────────────────
+from fastapi.responses import FileResponse, HTMLResponse
 
-if os.path.exists(frontend_dir):
-    app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(BACKEND_DIR)
+
+SEARCH_DIRS = [
+    os.path.join(BACKEND_DIR, "frontend"),
+    os.path.join(BACKEND_DIR, "assets"),
+    os.path.join(ROOT_DIR, "frontend"),
+    ROOT_DIR,
+    BACKEND_DIR,
+]
+
+def find_file(relative_path: str):
+    for d in SEARCH_DIRS:
+        target = os.path.join(d, relative_path)
+        if os.path.exists(target) and os.path.isfile(target):
+            return target
+    return None
+
+# Mount assets directory if available
+for d in [os.path.join(BACKEND_DIR, "assets"), os.path.join(BACKEND_DIR, "frontend", "assets"), os.path.join(ROOT_DIR, "assets"), os.path.join(ROOT_DIR, "frontend", "assets")]:
+    if os.path.exists(d) and os.path.isdir(d):
+        app.mount("/assets", StaticFiles(directory=d), name="assets")
+        break
+
+@app.get("/", response_class=HTMLResponse)
+async def serve_index():
+    path = find_file("index.html")
+    if path:
+        return FileResponse(path)
+    return HTMLResponse("<h1>BloodReach BD</h1><p>Welcome to BloodReach BD</p>")
+
+@app.get("/{page}.html", response_class=HTMLResponse)
+async def serve_html_page(page: str):
+    path = find_file(f"{page}.html")
+    if path:
+        return FileResponse(path)
+    return HTMLResponse(status_code=404, content="<h1>404 — Page Not Found</h1>")
 
 
 if __name__ == "__main__":

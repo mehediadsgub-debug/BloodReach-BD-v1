@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Hospital Admin Dashboard — Blood Reach BD. Manage blood inventory, view incoming requests." />
+  <title>Hospital Dashboard | Blood Reach BD</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
+</head>
+<body>
+
+  <!-- Animated Background -->
+  <div class="bg-layer" aria-hidden="true">
+    <div class="bg-gradient"></div>
+  </div>
+
+  <!-- Mobile Hamburger -->
+  <button class="hamburger" id="hamburgerBtn" aria-label="Toggle sidebar">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Update Stock Modal -->
+  <div class="modal-overlay" id="stockModal" role="dialog" aria-modal="true" aria-labelledby="stockModalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="stockModalTitle">🏥 Update Blood Stock</h2>
+        <button class="modal-close" id="stockModalClose" aria-label="Close">✕</button>
+      </div>
+      <form id="stockForm">
+        <div class="grid-2-col">
+          <div class="form-group">
+            <label for="stockBloodGroup" class="form-label">Blood Group</label>
+            <select id="stockBloodGroup" class="form-input" required>
+              <option value="A+">A+</option><option value="A-">A-</option>
+              <option value="B+">B+</option><option value="B-">B-</option>
+              <option value="O+">O+</option><option value="O-">O-</option>
+              <option value="AB+">AB+</option><option value="AB-">AB-</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="stockUnits" class="form-label">Units Available</label>
+            <input type="number" id="stockUnits" class="form-input" min="0" max="9999" placeholder="e.g. 15" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="stockNote" class="form-label">Note (optional)</label>
+          <input type="text" id="stockNote" class="form-input" placeholder="e.g. Fresh batch received" />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="stockCancelBtn">Cancel</button>
+          <button type="submit" class="btn btn-success">✔ Update Stock</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-section">
+        <span class="brand-logo" aria-hidden="true"><svg viewBox="0 0 48 56" width="28" height="32" fill="none"><path d="M24 3C24 3 7 23 7 36.5C7 46.1 14.6 53 24 53C33.4 53 41 46.1 41 36.5C41 23 24 3 24 3Z" fill="#ef4444"/><path d="M24 18V38M14 28H34" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/></svg></span>
+        <span class="brand-name">Blood Reach BD</span>
+      </div>
+
+      <div class="user-badge">
+        <div class="user-avatar" id="avatarIcon">🏥</div>
+        <div class="user-info">
+          <span class="user-name" id="userNameLabel">Loading...</span>
+          <span class="role-tag hospital">Hospital</span>
+        </div>
+      </div>
+
+      <nav class="nav-links" aria-label="Hospital navigation">
+        <span class="nav-section-label">Main</span>
+        <a href="#" class="nav-link active">🏠 Dashboard</a>
+        <a href="#" class="nav-link" id="navInventory">🏥 Inventory</a>
+        <a href="#" class="nav-link" id="navRequests">📋 Incoming Requests</a>
+
+        <span class="nav-section-label">Account</span>
+        <a href="#" class="nav-link" id="navProfile">⚙️ Profile Settings</a>
+        <button id="logoutBtn" class="btn nav-link logout-btn">🚪 Log Out</button>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+      <!-- Header -->
+      <div class="header-row">
+        <div>
+          <h1 class="page-title">Hospital Admin Console</h1>
+          <p class="welcome-msg" id="greetingLabel">Welcome back!</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-success" id="updateStockBtn">+ Update Stock</button>
+        </div>
+      </div>
+
+      <!-- Alert Banner -->
+      <div class="alert-banner" id="globalAlert" role="alert" aria-live="polite"></div>
+
+      <!-- Stats Row -->
+      <div class="stats-row">
+        <div class="stat-card" style="--stat-color:#66BB6A;">
+          <span class="stat-icon">🏥</span>
+          <span class="stat-value" id="statTotalUnits">—</span>
+          <span class="stat-label">Total Units in Stock</span>
+        </div>
+        <div class="stat-card" style="--stat-color:#EF5350;">
+          <span class="stat-icon">⚠️</span>
+          <span class="stat-value" id="statLowStock">—</span>
+          <span class="stat-label">Low Stock Alerts</span>
+        </div>
+        <div class="stat-card" style="--stat-color:#448AFF;">
+          <span class="stat-icon">📋</span>
+          <span class="stat-value" id="statPendingReqs">—</span>
+          <span class="stat-label">Pending Requests</span>
+        </div>
+        <div class="stat-card" style="--stat-color:#FFD740;">
+          <span class="stat-icon">✅</span>
+          <span class="stat-value" id="statFulfilledToday">—</span>
+          <span class="stat-label">Fulfilled Today</span>
+        </div>
+      </div>
+
+      <!-- Dashboard Grid -->
+      <div class="dashboard-grid">
+
+        <!-- Blood Inventory Card -->
+        <section class="dash-card" style="grid-column: span 3;" id="inventorySection">
+          <div class="card-header">
+            <h2 class="card-title">🩸 Blood Inventory Overview</h2>
+            <button class="btn btn-sm btn-success" id="updateStockBtn2">+ Update Stock</button>
+          </div>
+          <div class="blood-inventory-grid" id="bloodInventoryGrid">
+            <!-- Filled by JS -->
+          </div>
+          <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem;">
+            🟢 High (&gt;20) &nbsp;🟡 Medium (6–20) &nbsp;🔴 Low (0–5) — Last updated: <strong id="lastUpdated">Just now</strong>
+          </p>
+        </section>
+
+        <!-- Incoming Requests Card -->
+        <section class="dash-card" style="grid-column: span 3;" id="requestsSection">
+          <div class="card-header">
+            <h2 class="card-title">📋 Incoming Blood Requests</h2>
+            <span class="badge badge-yellow" id="pendingCount">5 pending</span>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Date</th>
+                  <th>Seeker</th>
+                  <th>Blood Group</th>
+                  <th>Units</th>
+                  <th>Urgency</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="requestsTableBody">
+                <!-- Filled by JS -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Profile Settings Card -->
+        <section class="dash-card" style="grid-column: span 3;" id="profileSection">
+          <div class="card-header">
+            <h2 class="card-title">⚙️ Hospital Profile</h2>
+            <button class="btn btn-sm btn-secondary" id="editProfileToggle">✏️ Edit</button>
+          </div>
+          <form id="profileForm">
+            <div class="grid-2-col">
+              <div class="form-group">
+                <label for="profileName" class="form-label">Hospital Name / Admin Name</label>
+                <input type="text" id="profileName" class="form-input" required disabled />
+              </div>
+              <div class="form-group">
+                <label for="profileEmail" class="form-label">Email Address</label>
+                <input type="email" id="profileEmail" class="form-input" required disabled />
+              </div>
+            </div>
+            <div id="profileFormActions" style="display:none; gap:0.75rem;" class="header-actions">
+              <button type="submit" class="btn btn-primary" id="saveProfileBtn">💾 Save Changes</button>
+              <button type="button" class="btn btn-secondary" id="cancelEditBtn">Cancel</button>
+            </div>
+          </form>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/js/dashboard.js"></script>
+  <script>
+    // ── Hospital-specific UI ─────────────────────────────────
+    const stockModal     = document.getElementById('stockModal');
+    const stockModalClose= document.getElementById('stockModalClose');
+    const stockCancelBtn = document.getElementById('stockCancelBtn');
+    const stockForm      = document.getElementById('stockForm');
+    const editToggle     = document.getElementById('editProfileToggle');
+    const formActions    = document.getElementById('profileFormActions');
+    const cancelBtn      = document.getElementById('cancelEditBtn');
+    const formInputs     = document.querySelectorAll('#profileForm .form-input');
+
+    // Nav scroll
+    document.getElementById('navInventory').addEventListener('click', e => {
+      e.preventDefault();
+      document.getElementById('inventorySection').scrollIntoView({behavior:'smooth'});
+    });
+    document.getElementById('navRequests').addEventListener('click', e => {
+      e.preventDefault();
+      document.getElementById('requestsSection').scrollIntoView({behavior:'smooth'});
+    });
+    document.getElementById('navProfile').addEventListener('click', e => {
+      e.preventDefault();
+      document.getElementById('profileSection').scrollIntoView({behavior:'smooth'});
+    });
+
+    // Open / close stock modal
+    ['updateStockBtn','updateStockBtn2'].forEach(id => {
+      document.getElementById(id)?.addEventListener('click', () => stockModal.classList.add('open'));
+    });
+    [stockModalClose, stockCancelBtn].forEach(btn => {
+      btn.addEventListener('click', () => stockModal.classList.remove('open'));
+    });
+    stockModal.addEventListener('click', e => {
+      if (e.target === stockModal) stockModal.classList.remove('open');
+    });
+
+    // Profile edit toggle
+    editToggle.addEventListener('click', () => {
+      formInputs.forEach(i => i.removeAttribute('disabled'));
+      formActions.style.display = 'flex';
+      editToggle.style.display = 'none';
+    });
+    cancelBtn.addEventListener('click', () => {
+      formInputs.forEach(i => i.setAttribute('disabled',''));
+      formActions.style.display = 'none';
+      editToggle.style.display = '';
+    });
+
+    // Blood inventory data (loaded from DB or mock)
+    let inventory = {
+      'A+': 0, 'A-': 0, 'B+': 0, 'B-': 0,
+      'O+': 0, 'O-': 0, 'AB+': 0, 'AB-': 0
+    };
+
+    function stockLevel(n) {
+      if (n <= 5) return 'low';
+      if (n <= 20) return 'medium';
+      return 'high';
+    }
+
+    function getProgressColor(units) {
+      if (units <= 5)  return 'var(--red-500)';
+      if (units <= 20) return '#FFA726';
+      return '#66BB6A';
+    }
+
+    function renderInventory() {
+      const grid = document.getElementById('bloodInventoryGrid');
+      grid.innerHTML = Object.entries(inventory).map(([bg, units]) => {
+        const level = stockLevel(units);
+        const pct   = Math.min(units / 50 * 100, 100);
+        const color = getProgressColor(units);
+        return `
+          <div class="blood-item ${level}">
+            <span class="blood-item-label">${bg}</span>
+            <span class="blood-item-stock">${units}</span>
+            <span class="blood-item-unit">units</span>
+            <div class="progress-bar" style="margin-top:0.5rem;">
+              <div class="progress-fill" style="width:${pct}%; background:${color};"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const lowCount = Object.values(inventory).filter(u => u <= 5).length;
+      const totalUnits = Object.values(inventory).reduce((a,b) => a+b, 0);
+      document.getElementById('statLowStock').textContent = lowCount;
+      document.getElementById('statTotalUnits').textContent = totalUnits;
+    }
+
+    // Fetch inventory from database
+    async function fetchInventory() {
+      try {
+        const response = await fetch(`${window.API_BASE}/api/v1/users/me/hospital-inventory`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Failed to load inventory');
+        const data = await response.json();
+        inventory = { 'A+': 0, 'A-': 0, 'B+': 0, 'B-': 0, 'O+': 0, 'O-': 0, 'AB+': 0, 'AB-': 0 };
+        data.forEach(item => { inventory[item.blood_group] = item.units_available; });
+        renderInventory();
+        document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+      } catch (err) {
+        renderInventory();
+      }
+    }
+
+    // Update stock form submit — saves to database
+    stockForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const bg    = document.getElementById('stockBloodGroup').value;
+      const units = parseInt(document.getElementById('stockUnits').value);
+      if (isNaN(units) || units < 0) return;
+
+      try {
+        const response = await fetch(`${window.API_BASE}/api/v1/users/me/hospital-inventory`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ blood_group: bg, units_available: units })
+        });
+        if (!response.ok) {
+          const d = await response.json();
+          throw new Error(d.detail || 'Update failed');
+        }
+        inventory[bg] = units;
+        renderInventory();
+        document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+        stockModal.classList.remove('open');
+        stockForm.reset();
+        showGlobalAlert('success', `✔ ${bg} stock updated to ${units} units.`);
+      } catch (err) {
+        showGlobalAlert('error', 'Error: ' + err.message);
+      }
+    });
+
+    // Incoming requests state
+    let reqData = [];
+
+    function urgencyBadge(u) {
+      if (u==='CRITICAL') return `<span class="badge badge-red"><span class="urgency-dot critical"></span>Critical</span>`;
+      if (u==='HIGH') return `<span class="badge badge-orange"><span class="urgency-dot high"></span>High</span>`;
+      return `<span class="badge badge-green"><span class="urgency-dot normal"></span>Normal</span>`;
+    }
+
+    function renderRequests() {
+      const tbody = document.getElementById('requestsTableBody');
+      if (!reqData.length) {
+        tbody.innerHTML = `<tr class="empty-row"><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem 0;">No incoming blood requests found.</td></tr>`;
+        document.getElementById('pendingCount').textContent = '0 pending';
+        document.getElementById('statPendingReqs').textContent = 0;
+        return;
+      }
+      tbody.innerHTML = reqData.map((r,i) => {
+        const phone = r.phone;
+        return `
+          <tr>
+            <td><strong>${i+1}</strong></td>
+            <td>${r.date}</td>
+            <td>
+              <strong>${r.seeker}</strong>
+              <div style="font-size:0.78rem;color:var(--text-muted);margin-top:0.2rem;">
+                <a href="tel:${phone}" style="color:#38bdf8;text-decoration:none;">📞 ${phone}</a>
+              </div>
+            </td>
+            <td><span class="bg-badge">${r.group}</span></td>
+            <td>${r.units} unit${r.units>1?'s':''}</td>
+            <td>${urgencyBadge(r.urgency)}</td>
+            <td>${r.status==='FULFILLED'
+              ? `<span class="badge badge-green">✔ Fulfilled</span>`
+              : r.status === 'OPEN' || r.status === 'PENDING'
+              ? `<span class="badge badge-yellow">⏳ Pending</span>`
+              : `<span class="badge badge-gray">${r.status}</span>`}
+            </td>
+            <td>${(r.status==='OPEN' || r.status==='PENDING') && r.request_id
+              ? `<button class="btn btn-sm btn-success" onclick="fulfillReq('${r.request_id}')">✔ Fulfill</button>`
+              : '—'}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      const pending = reqData.filter(r => r.status==='OPEN' || r.status==='PENDING').length;
+      document.getElementById('pendingCount').textContent = `${pending} pending`;
+      document.getElementById('statPendingReqs').textContent = pending;
+    }
+
+    async function fetchIncomingRequests() {
+      try {
+        const response = await fetch(`${window.API_BASE}/api/v1/requests/`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Failed to fetch requests.');
+        const data = await response.json();
+        reqData = data.map(r => ({
+          request_id: r.request_id,
+          date: r.created_at ? r.created_at.slice(0,10) : '—',
+          seeker: r.seeker ? r.seeker.full_name : 'Patient/Seeker',
+          phone: r.contact_phone || (r.seeker ? r.seeker.phone : null),
+          group: r.blood_group,
+          units: r.units_needed,
+          urgency: r.urgency_level,
+          status: r.status
+        }));
+        renderRequests();
+      } catch (err) {
+        reqData = [];
+        renderRequests();
+      }
+    }
+
+    window.fulfillReq = async function(reqId) {
+      if (!reqId) return;
+      try {
+        const response = await fetch(`${window.API_BASE}/api/v1/requests/${reqId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ status: 'FULFILLED' })
+        });
+        if (!response.ok) {
+          const d = await response.json();
+          throw new Error(d.detail || 'Fulfill failed');
+        }
+        showGlobalAlert('success', '✔ Request marked as fulfilled in database.');
+        fetchIncomingRequests();
+      } catch (err) {
+        showGlobalAlert('error', 'Error: ' + err.message);
+      }
+    };
+
+    function showGlobalAlert(type, msg) {
+      const el = document.getElementById('globalAlert');
+      el.className = `alert-banner ${type}`;
+      el.textContent = msg;
+      setTimeout(() => { el.className = 'alert-banner'; }, 4000);
+    }
+
+    // Override populateUI so inventory loads after session
+    const _origHospitalPopulate = window.populateUI;
+    window.populateUI = function(user) {
+      if (typeof _origHospitalPopulate === 'function') _origHospitalPopulate(user);
+      fetchInventory();
+      fetchIncomingRequests();
+    };
+  </script>
+</body>
+</html>
