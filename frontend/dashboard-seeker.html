@@ -1045,7 +1045,7 @@
       const r = 16;
       const size = r * 2 + 16;
       const svg = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
           <g transform="translate(8,8)">
             <circle cx="${r}" cy="${r}" r="${r}" fill="none" stroke="${color}" stroke-width="2.5" opacity="0.8">
               <animate attributeName="r" values="${r-2};${r+7};${r-2}" dur="1.8s" repeatCount="indefinite"/>
@@ -1068,7 +1068,7 @@
     function makeUserCenterIcon() {
       const size = 44;
       const svg = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
           <g transform="translate(22,22)">
             <circle cx="0" cy="0" r="18" fill="rgba(56, 189, 248, 0.25)">
               <animate attributeName="r" values="10;22;10" dur="2s" repeatCount="indefinite"/>
