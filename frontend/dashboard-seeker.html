@@ -1439,7 +1439,8 @@
         if (_seekerMap) _seekerMap.invalidateSize();
       }, 300);
 
-      // Fetch Donors from backend
+      // Fetch Donors from backend & local storage & CloudSync
+      let backendDonors = [];
       try {
         const response = await fetch(`${window.API_BASE}/api/v1/donors/search?is_available_only=true`, {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -1448,22 +1449,11 @@
         if (response && response.ok) {
           const data = await response.json();
           if (Array.isArray(data)) {
-            _allDonors = data.map((d, i) => ({
-              id: d.donor_id || d.id || (200 + i),
-              name: d.full_name || d.name || `Donor #${i + 1}`,
-              blood_group: d.blood_group,
-              district: d.district?.name || d.district || 'Dhaka',
-              division: d.district?.division?.name || d.division || 'Dhaka',
-              phone: d.phone || null,
-              is_phone_unlocked: !!d.is_phone_unlocked && !!d.phone,
-              is_available: d.is_available !== false,
-              last_donation: d.last_donation_date ? d.last_donation_date.slice(0, 10) : 'Ready'
-            }));
+            backendDonors = data;
           }
         }
       } catch (e) {
         console.warn('Backend donors fetch error:', e);
-        _allDonors = [];
       }
 
       if (window.CloudSync && typeof window.CloudSync.fetchCloudData === 'function') {
@@ -1472,26 +1462,56 @@
         } catch (e) {}
       }
 
-      if (!_allDonors || _allDonors.length === 0) {
-        let localUsers = [];
-        try {
-          localUsers = JSON.parse(localStorage.getItem('bloodreach_users_db') || '[]');
-        } catch (e) {}
+      let localUsers = [];
+      try {
+        localUsers = JSON.parse(localStorage.getItem('bloodreach_users_db') || '[]');
+      } catch (e) {}
 
-        const registeredDonors = localUsers.filter(u => u.role === 'DONOR').map((u, i) => ({
-          id: u.id || (500 + i),
-          name: u.full_name || u.name,
-          blood_group: u.blood_group || 'O+',
-          district: typeof u.district === 'object' ? u.district?.name : (u.district || 'Dhaka'),
-          division: typeof u.division === 'object' ? u.division?.name : (u.division || 'Dhaka'),
-          phone: u.phone,
-          is_phone_unlocked: true,
-          is_available: true,
-          last_donation: 'Ready to donate'
-        }));
+      const unifiedDonors = [];
+      const seenDonorKeys = new Set();
 
-        _allDonors = registeredDonors;
-      }
+      // 1. Add real local and CloudSync registered donors
+      localUsers.filter(u => u.role === 'DONOR').forEach((u, i) => {
+        const phoneKey = (u.phone || '').replace(/[^0-9]/g, '');
+        const emailKey = (u.email || '').toLowerCase().trim();
+        const key = phoneKey || emailKey || (u.id || `LOCAL_DONOR_${i}`);
+        if (!seenDonorKeys.has(key)) {
+          seenDonorKeys.add(key);
+          unifiedDonors.push({
+            id: u.id || (500 + i),
+            name: u.full_name || u.name || 'Registered Donor',
+            blood_group: u.blood_group || (u.donor_profile?.blood_group) || 'O+',
+            district: typeof u.district === 'object' ? (u.district?.name || 'Dhaka') : (u.district || 'Dhaka'),
+            division: typeof u.division === 'object' ? (u.division?.name || 'Dhaka') : (u.division || 'Dhaka'),
+            phone: u.phone,
+            is_phone_unlocked: true,
+            is_available: u.donor_profile ? (u.donor_profile.is_available !== false) : true,
+            last_donation: 'Ready to donate'
+          });
+        }
+      });
+
+      // 2. Add backend donors
+      backendDonors.forEach((d, i) => {
+        const phoneKey = (d.phone || '').replace(/[^0-9]/g, '');
+        const key = phoneKey || (d.donor_id || d.id || `BACKEND_DONOR_${i}`);
+        if (!seenDonorKeys.has(key)) {
+          seenDonorKeys.add(key);
+          unifiedDonors.push({
+            id: d.donor_id || d.id || (200 + i),
+            name: d.full_name || d.name || `Donor #${i + 1}`,
+            blood_group: d.blood_group || 'O+',
+            district: d.district?.name || d.district || 'Dhaka',
+            division: d.district?.division?.name || d.division || 'Dhaka',
+            phone: d.phone || null,
+            is_phone_unlocked: !!d.is_phone_unlocked && !!d.phone,
+            is_available: d.is_available !== false,
+            last_donation: d.last_donation_date ? d.last_donation_date.slice(0, 10) : 'Ready'
+          });
+        }
+      });
+
+      _allDonors = unifiedDonors;
 
       // Check URL query parameters (e.g., ?district=Chattogram)
       const urlParams = new URLSearchParams(window.location.search);

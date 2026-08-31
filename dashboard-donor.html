@@ -881,7 +881,8 @@
         if (_donorMap) _donorMap.invalidateSize();
       }, 300);
 
-      // Fetch Live Admin-Approved Seeker Requests from backend
+      // Fetch Live Seeker Requests from backend & local storage & CloudSync
+      let backendRequests = [];
       try {
         const response = await fetch(`${window.API_BASE}/api/v1/requests/?status_filter=OPEN`, {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -890,27 +891,11 @@
         if (response && response.ok) {
           const data = await response.json();
           if (Array.isArray(data)) {
-            _allSeekerRequests = data.map((r, i) => ({
-              request_id: r.request_id || `REQ-${100 + i}`,
-              invoice_no: `INV-${String(r.request_id || '').slice(0, 8).toUpperCase()}`,
-              patient_name: r.patient_name || 'Patient',
-              hospital: r.hospital_name || r.patient_condition || 'Hospital Clinic',
-              cabin: r.hospital_cabin || '',
-              district: r.district?.name || r.district || 'Dhaka',
-              division: r.district?.division?.name || r.division || 'Dhaka',
-              blood_group: r.blood_group,
-              units_needed: r.units_needed || 1,
-              urgency_level: r.urgency_level || 'HIGH',
-              phone: r.contact_phone || (r.seeker?.phone || ''),
-              verification_status: r.verification_status || 'APPROVED',
-              admin_notes: r.admin_notes || 'Verified by Admin',
-              verified_at: r.verified_at ? r.verified_at.slice(0, 10) : (r.created_at ? r.created_at.slice(0, 10) : 'Verified')
-            }));
+            backendRequests = data;
           }
         }
       } catch (e) {
         console.warn('Backend requests load error:', e);
-        _allSeekerRequests = [];
       }
 
       if (window.CloudSync && typeof window.CloudSync.fetchCloudData === 'function') {
@@ -919,31 +904,63 @@
         } catch (e) {}
       }
 
-      if (!_allSeekerRequests || _allSeekerRequests.length === 0) {
-        let localRequests = [];
-        try {
-          localRequests = JSON.parse(localStorage.getItem('bloodreach_requests_db') || '[]');
-        } catch (e) {}
+      let localRequests = [];
+      try {
+        localRequests = JSON.parse(localStorage.getItem('bloodreach_requests_db') || '[]');
+      } catch (e) {}
 
-        const registeredRequests = localRequests.map((r, i) => ({
-          request_id: r.id || `REQ-${200 + i}`,
-          invoice_no: `INV-${String(r.id || '').slice(0, 8).toUpperCase()}`,
-          patient_name: r.patient_name || 'Emergency Patient',
-          hospital: r.hospital_name || r.hospital || 'Dhaka Medical College',
-          cabin: r.cabin || 'ICU-3',
-          district: typeof r.district === 'object' ? r.district?.name : (r.district || 'Dhaka'),
-          division: typeof r.division === 'object' ? r.division?.name : (r.division || 'Dhaka'),
-          blood_group: r.blood_group || 'O+',
-          units_needed: r.units_needed || 1,
-          urgency_level: r.urgency_level || 'CRITICAL',
-          phone: r.phone || '01711-000000',
-          verification_status: 'APPROVED',
-          admin_notes: 'Verified Urgent Transfusion Case',
-          verified_at: 'Today'
-        }));
+      const unifiedRequests = [];
+      const seenKeys = new Set();
 
-        _allSeekerRequests = registeredRequests;
-      }
+      // 1. Add real local and CloudSync registered requests
+      localRequests.forEach((r, i) => {
+        const key = r.id || r.request_id || `${r.phone}_${r.blood_group}_${r.district}`;
+        if (!seenKeys.has(key)) {
+          seenKeys.add(key);
+          unifiedRequests.push({
+            request_id: r.id || r.request_id || `REQ-${200 + i}`,
+            invoice_no: `INV-${String(r.id || r.request_id || '').slice(0, 8).toUpperCase()}`,
+            patient_name: r.patient_name || 'Emergency Patient',
+            hospital: r.hospital_name || r.hospital || 'Hospital Clinic',
+            cabin: r.cabin || r.hospital_cabin || '',
+            district: typeof r.district === 'object' ? (r.district?.name || 'Dhaka') : (r.district || 'Dhaka'),
+            division: typeof r.division === 'object' ? (r.division?.name || 'Dhaka') : (r.division || 'Dhaka'),
+            blood_group: r.blood_group || 'O+',
+            units_needed: r.units_needed || 1,
+            urgency_level: r.urgency_level || 'CRITICAL',
+            phone: r.phone || r.contact_phone || '',
+            verification_status: r.verification_status || 'APPROVED',
+            admin_notes: r.admin_notes || 'Verified Urgent Request',
+            verified_at: r.verified_at || 'Verified'
+          });
+        }
+      });
+
+      // 2. Add backend requests
+      backendRequests.forEach((r, i) => {
+        const key = r.request_id || `BACKEND_REQ_${i}`;
+        if (!seenKeys.has(key)) {
+          seenKeys.add(key);
+          unifiedRequests.push({
+            request_id: r.request_id || `REQ-${100 + i}`,
+            invoice_no: `INV-${String(r.request_id || '').slice(0, 8).toUpperCase()}`,
+            patient_name: r.patient_name || 'Patient',
+            hospital: r.hospital_name || r.patient_condition || 'Hospital Clinic',
+            cabin: r.hospital_cabin || '',
+            district: r.district?.name || r.district || 'Dhaka',
+            division: r.district?.division?.name || r.division || 'Dhaka',
+            blood_group: r.blood_group,
+            units_needed: r.units_needed || 1,
+            urgency_level: r.urgency_level || 'HIGH',
+            phone: r.contact_phone || (r.seeker?.phone || ''),
+            verification_status: r.verification_status || 'APPROVED',
+            admin_notes: r.admin_notes || 'Verified by Admin',
+            verified_at: r.verified_at ? r.verified_at.slice(0, 10) : (r.created_at ? r.created_at.slice(0, 10) : 'Verified')
+          });
+        }
+      });
+
+      _allSeekerRequests = unifiedRequests;
 
       renderDonorRequestsMap();
     }
