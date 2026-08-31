@@ -995,6 +995,53 @@ body {
   animation: pulseGlow 2.5s infinite;
 }
 
+/* ── Comprehensive Mobile Responsive Design ── */
+@media (max-width: 992px) {
+  .page-wrapper {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+  .brand-panel {
+    padding: 2rem 1.5rem 1rem;
+    border-right: none;
+    border-bottom: 1px solid var(--border-glass);
+    text-align: center;
+  }
+  .brand-content {
+    position: static;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .brand-logo {
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+  .tagline-headline {
+    font-size: 1.6rem;
+  }
+  .tagline-body {
+    margin: 0 auto 1.5rem;
+    font-size: 0.9rem;
+  }
+  .stats-row {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .feature-list {
+    display: none;
+  }
+  .form-panel {
+    padding: 2rem 1.25rem 3rem;
+  }
+  .login-card {
+    max-width: 100%;
+    padding: 2rem 1.5rem;
+  }
+}
+
 @media (max-width: 900px) {
   .auth-top-navbar {
     padding: 0.65rem 1.25rem;
@@ -1003,5 +1050,75 @@ body {
     display: none;
   }
 }
+
+@media (max-width: 576px) {
+  .auth-top-navbar {
+    padding: 0.6rem 0.85rem;
+  }
+  .auth-nav-left {
+    gap: 0.75rem;
+  }
+  .auth-nav-title {
+    font-size: 0.95rem;
+  }
+  .auth-nav-right {
+    gap: 0.4rem;
+  }
+  .auth-nav-btn {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.72rem;
+  }
+  .brand-panel {
+    padding: 1.5rem 1rem 0.5rem;
+  }
+  .brand-logo .logo-drop {
+    width: 36px;
+    height: 48px;
+  }
+  .logo-main {
+    font-size: 1.2rem;
+  }
+  .tagline-headline {
+    font-size: 1.3rem;
+    line-height: 1.25;
+  }
+  .stats-row {
+    gap: 0.4rem;
+  }
+  .stat-num {
+    font-size: 1.1rem;
+  }
+  .stat-label {
+    font-size: 0.65rem;
+  }
+  .form-panel {
+    padding: 1rem 0.75rem 2.5rem;
+  }
+  .login-card {
+    padding: 1.5rem 1rem;
+    border-radius: var(--radius-lg);
+  }
+  .card-header h2 {
+    font-size: 1.3rem;
+  }
+  .role-selector {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  .role-btn {
+    padding: 0.65rem 0.5rem;
+    font-size: 0.78rem;
+  }
+  .form-input {
+    font-size: 16px !important;
+    padding: 0.85rem 1rem 0.85rem 2.75rem;
+  }
+  .btn-submit {
+    padding: 0.9rem;
+    font-size: 0.95rem;
+    min-height: 48px;
+  }
+}
+
 
 
