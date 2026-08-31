@@ -5,14 +5,25 @@ from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 from app.models.base import Base
 
-# Construct DATABASE_URL
-PG_URL = os.getenv("DATABASE_URL") or f"postgresql://{settings.DB_USER}:{settings.DB_PASS}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
+# Construct DATABASE_URL with Cloud PostgreSQL formatting (Neon / Supabase / Railway)
+RAW_DATABASE_URL = os.getenv("DATABASE_URL")
+if RAW_DATABASE_URL:
+    if RAW_DATABASE_URL.startswith("postgres://"):
+        PG_URL = RAW_DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    else:
+        PG_URL = RAW_DATABASE_URL
+else:
+    PG_URL = f"postgresql://{settings.DB_USER}:{settings.DB_PASS}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
 
 try:
-    engine = create_engine(PG_URL, pool_pre_ping=True)
+    engine = create_engine(
+        PG_URL,
+        pool_pre_ping=True,
+        pool_recycle=300
+    )
     with engine.connect() as conn:
         pass
-except Exception:
+except Exception as e:
     is_serverless = os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME")
     if is_serverless:
         sqlite_path = os.path.join(tempfile.gettempdir(), "bloodreach.db")
