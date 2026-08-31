@@ -37,7 +37,7 @@ Covering all 64 Districts & 8 Divisions of Bangladesh
 
 ## 📖 About the Project
 
-**Blood Reach BD** is a full-stack web platform designed to solve critical blood availability challenges across Bangladesh. The system connects blood donors, seekers, and hospital administrators in real time through intelligent location-based matching, urgency prioritisation, and automated notifications.
+**Blood Reach BD** is an enterprise full-stack web platform designed to solve critical blood availability challenges across Bangladesh. The system connects blood donors, seekers, and hospital administrators in real time through intelligent location-based matching, urgency prioritisation, and automated notifications.
 
 **Mission:** To eliminate preventable deaths caused by blood unavailability in Bangladesh by providing a reliable, real-time digital bridge between donors and recipients — empowering hospitals and individuals alike with transparent, data-driven tools.
 
@@ -46,29 +46,30 @@ Covering all 64 Districts & 8 Divisions of Bangladesh
 - Patients in emergency situations cannot find matching donors quickly enough.
 - Hospital blood banks lack real-time inventory visibility across the network.
 - Existing solutions are fragmented, offline, or geographically limited.
-- No centralised platform connects all 64 districts of Bangladesh under one system.
+- No centralised platform connects all 64 districts of Bangladesh under one unified system.
 
 ## ✨ Key Features
 
 - 🩸 Instant donor–seeker matching filtered by blood group and district
 - 🚨 Real-time urgency queue for critical requests (with auto-escalation)
 - 🏥 Hospital inventory management with low-stock alerts
-- 👥 Role-based dashboards for four user types
+- 👥 Role-based dashboards for four user types (Donor, Seeker, Hospital Admin, Superadmin)
 - 📊 Analytics for national blood supply monitoring
-- 📍 Location-based matching across 64 districts & 7 divisions
-- 🔔 Automated email/SMS notifications
+- 📍 Location-based matching across all 64 districts & 8 divisions
+- 🔔 Automated WebSocket, SMS, and email notifications
+- 🗺️ Public interactive 64-district live map for guests without login requirement
 
 ## 🛠 Tech Stack
 
 | Layer | Technology |
 |---|---|
 | **Backend** | Python 3.12, FastAPI, SQLAlchemy |
-| **Database** | PostgreSQL 15+ |
-| **Frontend** | HTML5, CSS3, Vanilla JavaScript |
-| **Authentication** | JWT, bcrypt |
-| **Migrations** | Alembic |
-| **Testing** | pytest, httpx, Locust |
-| **Version Control** | Git, GitHub (CI/CD via GitHub Actions) |
+| **Database** | PostgreSQL 15+ / SQLite Fallback |
+| **Frontend** | HTML5, CSS3, Vanilla JavaScript, Leaflet.js |
+| **Deployment** | Vercel Serverless Python (`@vercel/python`) & Static Hosting |
+| **Authentication** | JWT, bcrypt (4.0.1) |
+| **Testing** | pytest (30/30 automated tests passing) |
+| **Version Control** | Git, GitHub |
 
 ## 👤 User Roles
 
@@ -84,12 +85,8 @@ Covering all 64 Districts & 8 Divisions of Bangladesh
 A three-tier web application:
 
 ```
-Frontend (HTML/CSS/JS)  ⇄  Backend API (FastAPI)  ⇄  Database (PostgreSQL)
+Frontend (HTML/CSS/JS/Leaflet)  ⇄  Serverless API (FastAPI)  ⇄  Database (PostgreSQL / SQLite)
 ```
-
-Full UML Class Diagram and ER Diagram are available in [`docs/`](./docs):
-- `docs/UML_Class_Diagram.png`
-- `docs/ERD.png`
 
 ## 🗄 Database Schema
 
@@ -105,39 +102,38 @@ Full UML Class Diagram and ER Diagram are available in [`docs/`](./docs):
 | `hospitals` | `hospital_id` (UUID) | Hospital profiles |
 | `hospital_inventory` | `inv_id` (UUID) | Blood stock per hospital, per blood group |
 | `districts` | `district_id` (INT) | 64 districts of Bangladesh |
-| `divisions` | `division_id` (INT) | 7 divisions of Bangladesh |
+| `divisions` | `division_id` (INT) | 8 divisions of Bangladesh |
 | `notifications` | `notif_id` (UUID) | Email/SMS/system alerts |
 | `audit_logs` | `log_id` (UUID) | Action history for sensitive operations |
-
-**Key Relationships:**
-- `users` → `donors` (1:1)
-- `users` → `blood_requests` (1:N)
-- `hospitals` → `hospital_inventory` (1:N)
-- `districts` → `divisions` (N:1)
-- `notifications` → `users` (N:1)
 
 ## 📁 Project Structure
 
 ```
-blood-reach-bd/
+BloodReach-BD-v1/
+├── api/
+│   └── index.py               # Vercel Serverless FastAPI handler
 ├── backend/
 │   ├── app/
-│   │   ├── models/        # SQLAlchemy ORM models
-│   │   ├── schemas/        # Pydantic schemas
-│   │   ├── routers/        # API route handlers
-│   │   ├── services/       # Business logic
-│   │   ├── tasks/           # Background jobs (escalation, notifications)
-│   │   └── core/             # Security, RBAC, exceptions
-│   ├── alembic/             # DB migrations
-│   └── tests/                # pytest test suite
+│   │   ├── core/              # Database, security, config
+│   │   ├── models/            # SQLAlchemy models
+│   │   ├── routes/            # FastAPI route handlers
+│   │   ├── schemas/           # Pydantic validation schemas
+│   │   └── services/          # Matching engine & business logic
+│   ├── tests/                 # 30 Automated pytest tests
+│   ├── main.py                # Local FastAPI server entrypoint
+│   └── setup_db.py            # Database initializer & 64-district seeder
 ├── frontend/
-│   ├── *.html               # Landing, login, dashboards
-│   └── assets/              # CSS, JS, images
-├── docs/                   # SRS, DFDs, ERD, UML diagrams
-└── docker-compose.yml
+│   ├── assets/                # CSS, JS (cloud-sync.js, login.js, register.js)
+│   ├── index.html             # Public interactive map & Bangladesh blood stream
+│   ├── login.html             # Authentication portal
+│   ├── register.html          # Registration portal (8 divisions & 64 districts)
+│   ├── dashboard-donor.html   # Donor dashboard & 100km radar map
+│   ├── dashboard-seeker.html  # Seeker dashboard & nearby donors map
+│   ├── dashboard-admin.html   # Superadmin moderation & analytics
+│   └── dashboard-hospital.html# Hospital inventory management
+├── requirements.txt           # Python dependencies for Vercel & local setup
+└── vercel.json                # Vercel Serverless & Static routing configuration
 ```
-
-## 🚀 Getting Started
 
 ### Prerequisites
 - Python 3.12+
