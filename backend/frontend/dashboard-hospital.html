@@ -400,12 +400,6 @@
         localRequests = JSON.parse(localStorage.getItem('bloodreach_requests_db') || '[]');
       } catch (e) {}
 
-      const defaultSeed = [
-        { request_id: "REQ-HOSP-01", date: "Today", seeker: "Rahim Mia (Emergency ICU)", phone: "01711-112233", group: "O+", units: 2, urgency: "CRITICAL", status: "PENDING" },
-        { request_id: "REQ-HOSP-02", date: "Today", seeker: "Nasima Begum (Surgery)", phone: "01819-223344", group: "B+", units: 1, urgency: "HIGH", status: "PENDING" },
-        { request_id: "REQ-HOSP-03", date: "Today", seeker: "Abdul Halim (Trauma Care)", phone: "01713-334455", group: "A+", units: 3, urgency: "CRITICAL", status: "PENDING" }
-      ];
-
       const mappedLocal = localRequests.map(r => ({
         request_id: r.id || `REQ-${Date.now()}`,
         date: "Today",
@@ -417,7 +411,7 @@
         status: r.status || 'PENDING'
       }));
 
-      reqData = mappedLocal.length > 0 ? [...mappedLocal, ...defaultSeed] : defaultSeed;
+      reqData = mappedLocal;
 
       try {
         const response = await fetch(`${window.API_BASE}/api/v1/requests/`, {
