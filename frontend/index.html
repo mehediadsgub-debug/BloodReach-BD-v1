@@ -2146,8 +2146,12 @@
                         const stats = await response.json();
                         const donorsEl = document.getElementById('statDonorsCount');
                         const requestsEl = document.getElementById('statRequestsCount');
-                        if (donorsEl) donorsEl.textContent = stats.total_donors || 0;
-                        if (requestsEl) requestsEl.textContent = stats.pending_requests || stats.active_requests || 0;
+                        const dbDonors = stats.total_donors || 0;
+                        const dbReqs = stats.pending_requests || stats.active_requests || 0;
+                        const localDonors = _donorsData ? _donorsData.length : 0;
+                        const localReqs = _seekersData ? _seekersData.length : 0;
+                        if (donorsEl) donorsEl.textContent = Math.max(dbDonors, localDonors);
+                        if (requestsEl) requestsEl.textContent = Math.max(dbReqs, localReqs);
                         return;
                     }
                 }
@@ -2497,33 +2501,56 @@
             if (mapSection) mapSection.scrollIntoView({ behavior: 'smooth' });
         };
 
-        // Fetch live data directly from Database / Backend API
+        // Fetch live data directly from Database / Backend API and persistent store
         async function loadMapData() {
             let donors = [];
             let requests = [];
 
-            if (API_BASE) {
-                try {
-                    const [donorsRes, reqsRes] = await Promise.all([
-                        fetch(`${API_BASE}/api/v1/donors/search?is_available_only=false`).catch(() => null),
-                        fetch(`${API_BASE}/api/v1/requests/public`).catch(() => null)
-                    ]);
-                    if (donorsRes && donorsRes.ok) {
-                        donors = await donorsRes.json();
-                    }
-                    if (reqsRes && reqsRes.ok) {
-                        requests = await reqsRes.json();
-                    }
-                } catch (e) {
-                    console.warn('API load error:', e);
+            // 1. Fetch from Backend Database API
+            try {
+                const [donorsRes, reqsRes] = await Promise.all([
+                    fetch(`${API_BASE}/api/v1/donors/search?is_available_only=false`).catch(() => null),
+                    fetch(`${API_BASE}/api/v1/requests/public`).catch(() => null)
+                ]);
+                if (donorsRes && donorsRes.ok) {
+                    donors = await donorsRes.json();
                 }
+                if (reqsRes && reqsRes.ok) {
+                    requests = await reqsRes.json();
+                }
+            } catch (e) {
+                console.warn('API load error:', e);
             }
 
-            // If offline, fallback to genuine session storage via CloudSync
-            if (donors.length === 0 && requests.length === 0 && window.CloudSync) {
+            // 2. Merge with locally and cloud-stored registered records
+            if (window.CloudSync) {
                 try {
-                    donors = await window.CloudSync.getPublicDonors();
-                    requests = await window.CloudSync.getPublicRequests();
+                    const [cDonors, cRequests] = await Promise.all([
+                        window.CloudSync.getPublicDonors(),
+                        window.CloudSync.getPublicRequests()
+                    ]);
+
+                    const donorMap = new Map();
+                    (Array.isArray(donors) ? donors : []).forEach(d => {
+                        const k = (d.phone || '').replace(/[^0-9]/g, '') || d.donor_id || d.id;
+                        if (k) donorMap.set(k, d);
+                    });
+                    (Array.isArray(cDonors) ? cDonors : []).forEach(d => {
+                        const k = (d.phone || '').replace(/[^0-9]/g, '') || (d.email || '').toLowerCase().trim() || d.id || d.donor_id;
+                        if (k && !donorMap.has(k)) donorMap.set(k, d);
+                    });
+                    donors = Array.from(donorMap.values());
+
+                    const reqMap = new Map();
+                    (Array.isArray(requests) ? requests : []).forEach(r => {
+                        const k = r.request_id || r.id || `${r.phone}_${r.blood_group}_${r.district}`;
+                        if (k) reqMap.set(k, r);
+                    });
+                    (Array.isArray(cRequests) ? cRequests : []).forEach(r => {
+                        const k = r.request_id || r.id || `${r.phone || r.contact_phone}_${r.blood_group}_${r.district}`;
+                        if (k && !reqMap.has(k)) reqMap.set(k, r);
+                    });
+                    requests = Array.from(reqMap.values());
                 } catch (e) {}
             }
 

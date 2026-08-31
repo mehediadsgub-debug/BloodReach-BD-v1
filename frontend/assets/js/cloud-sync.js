@@ -7,12 +7,21 @@
 'use strict';
 
 (function () {
-  // Instant Legacy Cache Sanitizer for clean Vercel & client experience
+  // Selective Legacy Mock Data Sanitizer (Preserves all real registered users)
   try {
     const rawUsers = localStorage.getItem('bloodreach_users_db');
-    if (rawUsers && (rawUsers.includes('usr_dhaka_') || rawUsers.includes('Tanvir Ahmed') || rawUsers.includes('Selina Begum') || rawUsers.includes('Nusrat Jahan'))) {
-      localStorage.removeItem('bloodreach_users_db');
-      localStorage.removeItem('bloodreach_requests_db');
+    if (rawUsers) {
+      const parsed = JSON.parse(rawUsers);
+      if (Array.isArray(parsed)) {
+        const cleaned = parsed.filter(u => {
+          const name = String(u.full_name || u.name || '');
+          const id = String(u.id || u.user_id || '');
+          return !id.startsWith('usr_dhaka_') && !id.startsWith('usr_ctg_') && !name.includes('Tanvir Ahmed') && !name.includes('Selina Begum') && !name.includes('Nusrat Jahan');
+        });
+        if (cleaned.length !== parsed.length) {
+          localStorage.setItem('bloodreach_users_db', JSON.stringify(cleaned));
+        }
+      }
     }
   } catch (e) {}
 
