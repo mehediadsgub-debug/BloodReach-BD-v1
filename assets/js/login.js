@@ -103,6 +103,13 @@ function setRole(role) {
     t.setAttribute('aria-pressed', isCurrent ? 'true' : 'false');
   });
 
+  const emergencyBanner = document.getElementById('emergencyAlertBanner');
+  const titleEl = document.getElementById('formTitle');
+  if (normalized !== 'SEEKER') {
+    if (emergencyBanner) emergencyBanner.hidden = true;
+    if (titleEl) titleEl.textContent = 'Welcome Back';
+  }
+
   const roleDescMap = {
     DONOR: 'Access donor requests, update availability status, and track donation impact.',
     SEEKER: 'Post urgent blood requests, track nearby matches, and connect with donors.',
@@ -236,6 +243,9 @@ async function authenticateAndSaveSession(identifier, role, password, serverToke
     await window.CloudSync.fetchCloudData();
   }
 
+  // The role chosen on the login screen must strictly take precedence
+  const effectiveRole = (role || selectedRole || 'DONOR').toUpperCase();
+
   let matchedUser = null;
   try {
     const usersList = JSON.parse(localStorage.getItem('bloodreach_users_db') || '[]');
@@ -246,21 +256,50 @@ async function authenticateAndSaveSession(identifier, role, password, serverToke
     );
   } catch (e) {}
 
-  const activeUser = matchedUser || {
+  const activeUser = matchedUser ? { ...matchedUser } : {
     id: 'usr_' + Date.now(),
     full_name: identifier.includes('@') ? identifier.split('@')[0] : identifier,
     name: identifier.includes('@') ? identifier.split('@')[0] : identifier,
     phone: identifier.startsWith('01') ? identifier : '',
     email: identifier.includes('@') ? identifier : `${identifier}@bloodreach.local`,
-    role: role,
     district: 'Dhaka',
     division: 'Dhaka',
     blood_group: 'O+'
   };
 
+  activeUser.role = effectiveRole;
+
+  if (effectiveRole === 'DONOR') {
+    if (!activeUser.donor_profile) {
+      activeUser.donor_profile = {
+        blood_group: activeUser.blood_group || 'O+',
+        is_available: true,
+        district: typeof activeUser.district === 'object' ? activeUser.district?.name : (activeUser.district || 'Dhaka'),
+        division: typeof activeUser.division === 'object' ? activeUser.division?.name : (activeUser.division || 'Dhaka'),
+        total_donations: 0
+      };
+    }
+  }
+
+  // Save/update in local users registry
+  try {
+    const usersList = JSON.parse(localStorage.getItem('bloodreach_users_db') || '[]');
+    const cleanId = identifier.replace(/[\s\-\(\)]/g, '').toLowerCase();
+    const idx = usersList.findIndex(u => 
+      (u.email && u.email.toLowerCase() === cleanId) ||
+      (u.phone && u.phone.replace(/[\s\-\(\)]/g, '') === cleanId)
+    );
+    if (idx >= 0) {
+      usersList[idx] = { ...usersList[idx], ...activeUser };
+    } else {
+      usersList.push(activeUser);
+    }
+    localStorage.setItem('bloodreach_users_db', JSON.stringify(usersList));
+  } catch (e) {}
+
   const storage = rememberMe && rememberMe.checked ? localStorage : sessionStorage;
   storage.setItem('bloodreach_access_token', serverToken || ('token_' + Date.now()));
-  storage.setItem('bloodreach_user_role', activeUser.role || role);
+  storage.setItem('bloodreach_user_role', effectiveRole);
   storage.setItem('bloodreach_user_name', activeUser.full_name || activeUser.name);
   storage.setItem('bloodreach_user_phone', activeUser.phone || '');
   storage.setItem('bloodreach_user_email', activeUser.email || '');
@@ -269,7 +308,11 @@ async function authenticateAndSaveSession(identifier, role, password, serverToke
   if (activeUser.blood_group) storage.setItem('bloodreach_user_blood_group', activeUser.blood_group);
   storage.setItem('bloodreach_current_user', JSON.stringify(activeUser));
 
-  showAlert('success', `Welcome back, ${activeUser.full_name || activeUser.name}! Redirecting...`);
+  if (window.CloudSync && typeof window.CloudSync.saveUser === 'function') {
+    window.CloudSync.saveUser(activeUser);
+  }
+
+  showAlert('success', `Welcome back, ${activeUser.full_name || activeUser.name}! Redirecting to ${effectiveRole} Dashboard...`);
 
   setTimeout(() => {
     const dashboardMap = {
@@ -280,17 +323,10 @@ async function authenticateAndSaveSession(identifier, role, password, serverToke
       SUPERADMIN: 'dashboard-admin.html',
       ADMIN: 'dashboard-admin.html',
     };
-    const isEmergency = new URLSearchParams(window.location.search).get('emergency') === '1'
-      || new URLSearchParams(window.location.search).get('emergency') === 'true'
-      || new URLSearchParams(window.location.search).get('urgent') === '1';
 
-    const targetRole = activeUser.role || role;
-    if (targetRole === 'SEEKER' && isEmergency) {
-      window.location.href = 'dashboard-seeker.html?emergency=1';
-    } else {
-      window.location.href = dashboardMap[targetRole] || 'index.html';
-    }
-  }, 1000);
+    const targetUrl = dashboardMap[effectiveRole] || (effectiveRole === 'DONOR' ? 'dashboard-donor.html' : 'dashboard-seeker.html');
+    window.location.href = targetUrl;
+  }, 600);
 }
 
 /* ── Form Submit ───────────────────────────────────────── */
