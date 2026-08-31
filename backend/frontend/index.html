@@ -1216,12 +1216,199 @@
                 font-size: 1.3rem;
             }
 
-            .sos-banner-actions {
-                width: 100%;
+        /* ── Mobile Menu Toggle Button ─────────────────────── */
+        .mobile-menu-toggle {
+            display: none;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-sm);
+            padding: 0.55rem;
+            cursor: pointer;
+            flex-direction: column;
+            gap: 4px;
+            z-index: 1001;
+        }
+
+        .mobile-menu-toggle span {
+            display: block;
+            width: 20px;
+            height: 2px;
+            background: #fff;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        /* ── Mobile Drawer ─────────────────────────────────── */
+        .mobile-drawer-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            z-index: 1998;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .mobile-drawer-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .mobile-drawer {
+            position: fixed;
+            top: 0;
+            right: -320px;
+            width: 290px;
+            height: 100vh;
+            background: #0E0E18;
+            border-left: 1px solid var(--border-glass-strong);
+            z-index: 1999;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: -10px 0 40px rgba(0, 0, 0, 0.8);
+        }
+
+        .mobile-drawer.active {
+            transform: translateX(-320px);
+        }
+
+        .mobile-drawer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.75rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        .mobile-drawer-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.8rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .mobile-drawer-close:hover {
+            color: #fff;
+        }
+
+        .mobile-drawer-body {
+            display: flex;
+            flex-direction: column;
+            gap: 1.15rem;
+        }
+
+        .mobile-drawer-link {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.4rem 0;
+            transition: var(--transition);
+        }
+
+        .mobile-drawer-link:hover {
+            color: #EF4444;
+            transform: translateX(4px);
+        }
+
+        .mobile-drawer-divider {
+            height: 1px;
+            background: var(--border-glass);
+            margin: 0.5rem 0;
+        }
+
+        .mobile-drawer-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        /* ── Floating Mobile Bottom App Bar ────────────────── */
+        .mobile-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 62px;
+            background: rgba(14, 14, 24, 0.94);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-glass-strong);
+            z-index: 1000;
+            align-items: center;
+            justify-content: space-around;
+            padding: 0 0.5rem;
+            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .mobile-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.68rem;
+            font-weight: 600;
+            gap: 2px;
+            transition: var(--transition);
+            flex: 1;
+            padding: 4px 0;
+        }
+
+        .mobile-nav-icon {
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+
+        .mobile-nav-item:hover,
+        .mobile-nav-item.active {
+            color: #EF4444;
+        }
+
+        .mobile-nav-item.emergency-pill {
+            background: linear-gradient(135deg, #EF4444, #B91C1C);
+            color: #fff !important;
+            border-radius: var(--radius-pill);
+            padding: 6px 12px;
+            margin: 0 4px;
+            box-shadow: 0 0 16px rgba(239, 68, 68, 0.6);
+            transform: translateY(-8px);
+        }
+
+        .mobile-nav-item.emergency-pill .mobile-nav-icon {
+            font-size: 1.1rem;
+        }
+
+        .mobile-nav-item.emergency-pill .mobile-nav-label {
+            font-weight: 800;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: 65px; /* Space for bottom mobile nav */
             }
 
-            .sos-banner-actions .btn {
-                width: 100%;
+            .mobile-menu-toggle {
+                display: flex;
+            }
+
+            .mobile-bottom-nav {
+                display: flex;
+            }
+
+            .nav-actions {
+                display: none;
             }
         }
     </style>
@@ -1274,7 +1461,60 @@
             <a href="register.html" class="btn btn-primary" id="navRegisterBtn">Register</a>
             <button class="btn btn-emergency" id="navEmergencyBtn">🚨 Emergency Request</button>
         </div>
+
+        <!-- Mobile Hamburger Button -->
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Open navigation menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
     </header>
+
+    <!-- Mobile Drawer Overlay & Off-Canvas Menu -->
+    <div class="mobile-drawer-overlay" id="mobileDrawerOverlay"></div>
+    <div class="mobile-drawer" id="mobileDrawer">
+        <div class="mobile-drawer-header">
+            <div class="brand-text">
+                <span class="brand-title" style="font-size:1.15rem;">Blood <span>Reach</span> BD</span>
+            </div>
+            <button class="mobile-drawer-close" id="mobileDrawerClose" aria-label="Close menu">&times;</button>
+        </div>
+        <div class="mobile-drawer-body">
+            <a href="#mapSection" class="mobile-drawer-link" onclick="closeMobileDrawer()">🗺️ Live Blood Map</a>
+            <a href="#rolesSection" class="mobile-drawer-link" onclick="closeMobileDrawer()">⚡ How It Works</a>
+            <a href="#hotlinesSection" class="mobile-drawer-link" onclick="closeMobileDrawer()">📞 Emergency Hotlines</a>
+            <div class="mobile-drawer-divider"></div>
+            <div class="mobile-drawer-actions">
+                <a href="login.html" class="btn btn-ghost" style="width:100%; text-align:center;">🔑 Sign In</a>
+                <a href="register.html" class="btn btn-primary" style="width:100%; text-align:center;">🩸 Join as Donor</a>
+                <button class="btn btn-emergency" style="width:100%;" onclick="handleEmergencyClick(); closeMobileDrawer();">🚨 Post Emergency SOS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Mobile Bottom App Navigation Bar -->
+    <nav class="mobile-bottom-nav" aria-label="Mobile bottom navigation">
+        <a href="index.html" class="mobile-nav-item active">
+            <span class="mobile-nav-icon">🏠</span>
+            <span class="mobile-nav-label">Home</span>
+        </a>
+        <a href="#mapSection" class="mobile-nav-item">
+            <span class="mobile-nav-icon">🗺️</span>
+            <span class="mobile-nav-label">Live Map</span>
+        </a>
+        <a href="login.html?mode=emergency" class="mobile-nav-item emergency-pill">
+            <span class="mobile-nav-icon">🚨</span>
+            <span class="mobile-nav-label">SOS</span>
+        </a>
+        <a href="#hotlinesSection" class="mobile-nav-item">
+            <span class="mobile-nav-icon">📞</span>
+            <span class="mobile-nav-label">Hotlines</span>
+        </a>
+        <a href="login.html" class="mobile-nav-item">
+            <span class="mobile-nav-icon">👤</span>
+            <span class="mobile-nav-label">Login</span>
+        </a>
+    </nav>
 
     <!-- Hero Section (Cleaned, No Old Search Form) -->
     <main>
@@ -1955,8 +2195,27 @@
         }
 
         // ────────────────────────────────────────────────────────
-        // 6. Blood Group Instant Filter Click Listener
+        // 7. Mobile Drawer Interaction Handlers
         // ────────────────────────────────────────────────────────
+        function openMobileDrawer() {
+            const drawer = document.getElementById('mobileDrawer');
+            const overlay = document.getElementById('mobileDrawerOverlay');
+            if (drawer) drawer.classList.add('active');
+            if (overlay) overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMobileDrawer() {
+            const drawer = document.getElementById('mobileDrawer');
+            const overlay = document.getElementById('mobileDrawerOverlay');
+            if (drawer) drawer.classList.remove('active');
+            if (overlay) overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        window.closeMobileDrawer = closeMobileDrawer;
+        window.openMobileDrawer = openMobileDrawer;
+
         document.addEventListener('DOMContentLoaded', () => {
             initBloodMap();
 
@@ -1981,6 +2240,14 @@
                     renderMap();
                 });
             });
+
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const mobileDrawerClose = document.getElementById('mobileDrawerClose');
+            const mobileDrawerOverlay = document.getElementById('mobileDrawerOverlay');
+
+            if (mobileMenuToggle) mobileMenuToggle.addEventListener('click', openMobileDrawer);
+            if (mobileDrawerClose) mobileDrawerClose.addEventListener('click', closeMobileDrawer);
+            if (mobileDrawerOverlay) mobileDrawerOverlay.addEventListener('click', closeMobileDrawer);
         });
     </script>
 </body>
