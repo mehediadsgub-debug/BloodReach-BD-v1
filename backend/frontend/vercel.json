@@ -1,3 +1,33 @@
 {
-  "cleanUrls": true
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/login",
+      "destination": "/login.html"
+    },
+    {
+      "source": "/register",
+      "destination": "/register.html"
+    },
+    {
+      "source": "/dashboard-donor",
+      "destination": "/dashboard-donor.html"
+    },
+    {
+      "source": "/dashboard-seeker",
+      "destination": "/dashboard-seeker.html"
+    },
+    {
+      "source": "/dashboard-hospital",
+      "destination": "/dashboard-hospital.html"
+    },
+    {
+      "source": "/dashboard-admin",
+      "destination": "/dashboard-admin.html"
+    }
+  ]
 }
