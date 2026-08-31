@@ -171,9 +171,10 @@ async def serve_index():
         return FileResponse(path)
     return HTMLResponse("<h1>BloodReach BD</h1><p>Frontend file not found</p>")
 
-@app.get("/{page}.html", response_class=HTMLResponse)
-async def serve_html_page(page: str):
-    path = os.path.join(FRONTEND_DIR, f"{page}.html")
+@app.get("/{page}", response_class=HTMLResponse)
+async def serve_page(page: str):
+    clean_page = page.replace(".html", "")
+    path = os.path.join(FRONTEND_DIR, f"{clean_page}.html")
     if os.path.exists(path):
         return FileResponse(path)
     return HTMLResponse(status_code=404, content="<h1>404 — Page Not Found</h1>")
