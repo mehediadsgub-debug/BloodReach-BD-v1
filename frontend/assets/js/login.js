@@ -276,14 +276,31 @@ loginForm.addEventListener('submit', async (e) => {
     }, 1400);
 
   } catch (err) {
-    // Network / server unreachable — always reset loading state
-    const isNetworkError = err instanceof TypeError;
+    // Network / server unreachable (e.g. static preview on Vercel)
+    const isNetworkError = err instanceof TypeError || !navigator.onLine;
     if (isNetworkError) {
-      showAlert('error', 'Cannot connect to server. Please ensure the backend is running on port 8000.');
-    } else {
-      showAlert('error', 'An unexpected error occurred. Please try again.');
+      // Create seamless demo session so visitors can explore all dashboards
+      const storage = rememberMe.checked ? localStorage : sessionStorage;
+      storage.setItem('bloodreach_access_token', 'demo-token-' + Date.now());
+      storage.setItem('bloodreach_user_role', selectedRole);
+      storage.setItem('bloodreach_user_name', `Demo ${selectedRole.charAt(0) + selectedRole.slice(1).toLowerCase()}`);
+      
+      showAlert('success', `⚡ Demo Mode active! Redirecting to ${selectedRole} dashboard...`);
+      setTimeout(() => {
+        const dashboardMap = {
+          DONOR: 'dashboard-donor.html',
+          SEEKER: 'dashboard-seeker.html',
+          HOSPITAL: 'dashboard-hospital.html',
+          HOSPITAL_ADMIN: 'dashboard-hospital.html',
+          SUPERADMIN: 'dashboard-admin.html',
+          ADMIN: 'dashboard-admin.html'
+        };
+        window.location.href = dashboardMap[selectedRole] || 'dashboard-donor.html';
+      }, 1000);
+      return;
     }
-    setLoading(false); // ✅ সবসময় loading বন্ধ হবে
+    showAlert('error', 'An unexpected error occurred. Please try again.');
+    setLoading(false);
   }
 });
 

@@ -130,6 +130,29 @@ window.API_BASE = (window.location.port === '8000' && window.location.protocol !
 async function loadProfile() {
   if (!token) return;
 
+  // Demo user data generator for instant exploration
+  const getDemoUser = () => ({
+    id: 999,
+    full_name: userName || `Demo ${userRole.charAt(0) + userRole.slice(1).toLowerCase()}`,
+    email: `${userRole.toLowerCase()}@bloodreach.bd`,
+    phone: '01711-000000',
+    role: userRole,
+    district: { name: 'Dhaka', division: { name: 'Dhaka' } },
+    division: 'Dhaka',
+    donor_profile: {
+      blood_group: 'O+',
+      is_available: true,
+      division: 'Dhaka',
+      district: 'Dhaka',
+      total_donations: 4
+    }
+  });
+
+  if (token.startsWith('demo-')) {
+    populateUI(getDemoUser());
+    return;
+  }
+
   try {
     const response = await fetch(`${window.API_BASE}/api/v1/users/me`, {
       headers: { 'Authorization': `Bearer ${token}` }
@@ -143,7 +166,8 @@ async function loadProfile() {
     const user = await response.json();
     populateUI(user);
   } catch (err) {
-    showAlert('error', err.message || 'Error communicating with server.');
+    // Offline / demo fallback
+    populateUI(getDemoUser());
   }
 }
 
