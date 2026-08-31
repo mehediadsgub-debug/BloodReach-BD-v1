@@ -2111,40 +2111,7 @@
             });
         }
 
-        // Rich Nationwide Dataset for Instant Demo / Offline Mode
-        const FALLBACK_DONORS = [
-            { id: 1, blood_group: 'O+', district: 'Dhaka', full_name: 'Tanvir Ahmed', phone: '01711223344' },
-            { id: 2, blood_group: 'A+', district: 'Dhaka', full_name: 'Sadia Rahman', phone: '01811223344' },
-            { id: 3, blood_group: 'B+', district: 'Dhaka', full_name: 'Mahir Faisal', phone: '01911223344' },
-            { id: 4, blood_group: 'AB+', district: 'Chattogram', full_name: 'Rashed Karim', phone: '01611223344' },
-            { id: 5, blood_group: 'O-', district: 'Chattogram', full_name: 'Nusrat Jahan', phone: '01511223344' },
-            { id: 6, blood_group: 'A+', district: 'Sylhet', full_name: 'Syed Al-Amin', phone: '01722334455' },
-            { id: 7, blood_group: 'B+', district: 'Sylhet', full_name: 'Fariha Chowdhury', phone: '01822334455' },
-            { id: 8, blood_group: 'O+', district: 'Rajshahi', full_name: 'Kazi Nazmul', phone: '01922334455' },
-            { id: 9, blood_group: 'A-', district: 'Rajshahi', full_name: 'Tahmina Akhter', phone: '01622334455' },
-            { id: 10, blood_group: 'B-', district: 'Khulna', full_name: 'Arif Hasan', phone: '01522334455' },
-            { id: 11, blood_group: 'AB-', district: 'Khulna', full_name: 'Mehnaz Kabir', phone: '01733445566' },
-            { id: 12, blood_group: 'O+', district: 'Barishal', full_name: 'Jahidul Islam', phone: '01833445566' },
-            { id: 13, blood_group: 'A+', district: 'Barishal', full_name: 'Shirin Sultana', phone: '01933445566' },
-            { id: 14, blood_group: 'B+', district: 'Rangpur', full_name: 'Shariful Alam', phone: '01633445566' },
-            { id: 15, blood_group: 'O+', district: 'Rangpur', full_name: 'Farzana Parvin', phone: '01533445566' },
-            { id: 16, blood_group: 'A+', district: 'Mymensingh', full_name: 'Hasibul Hasan', phone: '01744556677' },
-            { id: 17, blood_group: 'AB+', district: 'Mymensingh', full_name: 'Sabrina Noor', phone: '01844556677' },
-            { id: 18, blood_group: 'O+', district: 'Cumilla', full_name: 'Kamrul Ahsan', phone: '01944556677' },
-            { id: 19, blood_group: 'B+', district: "Cox's Bazar", full_name: 'Sohag Hossain', phone: '01644556677' },
-            { id: 20, blood_group: 'O-', district: 'Bogura', full_name: 'Amina Khatun', phone: '01544556677' },
-            { id: 21, blood_group: 'A+', district: 'Gazipur', full_name: 'Moniruzzaman', phone: '01755667788' },
-            { id: 22, blood_group: 'B+', district: 'Narayanganj', full_name: 'Rabeya Bosri', phone: '01855667788' }
-        ];
-
-        const FALLBACK_SEEKERS = [
-            { id: 101, blood_group: 'O+', district: 'Dhaka', patient_name: 'Fatema Begum', hospital_name: 'Dhaka Medical College Hospital', urgency: 'CRITICAL' },
-            { id: 102, blood_group: 'AB-', district: 'Chattogram', patient_name: 'Abdur Rahim', hospital_name: 'Chittagong Medical College Hospital', urgency: 'CRITICAL' },
-            { id: 103, blood_group: 'B+', district: 'Sylhet', patient_name: 'Khadija Akter', hospital_name: 'MAG Osmani Medical College', urgency: 'HIGH' },
-            { id: 104, blood_group: 'A+', district: 'Rajshahi', patient_name: 'Shakil Mia', hospital_name: 'Rajshahi Medical College Hospital', urgency: 'CRITICAL' }
-        ];
-
-        // Fetch live data from backend or fallback dataset
+        // Fetch live data from backend
         async function loadMapData() {
             try {
                 const [donorsRes, seekersRes] = await Promise.all([
@@ -2154,19 +2121,20 @@
 
                 if (donorsRes && donorsRes.ok) {
                     _donorsData = await donorsRes.json();
+                } else {
+                    _donorsData = [];
                 }
                 if (seekersRes && seekersRes.ok) {
                     _seekersData = await seekersRes.json();
+                } else {
+                    _seekersData = [];
                 }
-
-                if (!_donorsData || _donorsData.length === 0) _donorsData = FALLBACK_DONORS;
-                if (!_seekersData || _seekersData.length === 0) _seekersData = FALLBACK_SEEKERS;
 
                 renderMap();
             } catch (err) {
                 console.warn('Map data load error:', err);
-                _donorsData = FALLBACK_DONORS;
-                _seekersData = FALLBACK_SEEKERS;
+                _donorsData = [];
+                _seekersData = [];
                 renderMap();
             } finally {
                 const overlay = document.getElementById('mapLoadingOverlay');
