@@ -810,6 +810,221 @@
             transform: translateY(-1px);
         }
 
+        .popup-btn.secondary {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #E2E8F0;
+            margin-top: 0.4rem;
+        }
+
+        .popup-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
+        }
+
+        .popup-list-item {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 6px;
+            padding: 0.35rem 0.5rem;
+            margin-bottom: 0.35rem;
+            font-size: 0.76rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.4rem;
+        }
+
+        .popup-list-item .badge-pill {
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        /* ── Public District Search Bar ── */
+        .district-search-box {
+            position: relative;
+            margin-bottom: 1.25rem;
+            width: 100%;
+        }
+
+        .district-search-input {
+            width: 100%;
+            padding: 0.85rem 1.4rem 0.85rem 2.8rem;
+            background: rgba(14, 18, 30, 0.8);
+            border: 1.5px solid rgba(239, 68, 68, 0.3);
+            border-radius: var(--radius-pill);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.92rem;
+            outline: none;
+            transition: var(--transition);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .district-search-input:focus {
+            border-color: #EF4444;
+            box-shadow: 0 0 20px rgba(229, 57, 53, 0.35);
+            background: rgba(18, 22, 38, 0.95);
+        }
+
+        .district-search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #EF4444;
+            font-size: 1.1rem;
+            pointer-events: none;
+        }
+
+        /* ── Live Public Activity Feed Section ── */
+        .live-feed-wrapper {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-glass);
+        }
+
+        .feed-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .feed-heading {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feed-tabs-filter {
+            display: flex;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+        }
+
+        .feed-tab-btn {
+            padding: 0.4rem 0.85rem;
+            border-radius: var(--radius-pill);
+            border: 1px solid var(--border-glass);
+            background: var(--bg-glass);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .feed-tab-btn:hover {
+            background: rgba(239, 68, 68, 0.15);
+            color: #fff;
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+
+        .feed-tab-btn.active {
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+            color: #fff;
+            border-color: #EF4444;
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.45);
+        }
+
+        .public-feed-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            max-height: 440px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .public-feed-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+        .public-feed-grid::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        .public-feed-grid::-webkit-scrollbar-thumb {
+            background: rgba(239, 68, 68, 0.4);
+            border-radius: 4px;
+        }
+
+        .feed-card {
+            background: rgba(18, 22, 36, 0.75);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 0.75rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .feed-card:hover {
+            background: rgba(26, 32, 50, 0.95);
+            border-color: rgba(239, 68, 68, 0.45);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .feed-card.request-card {
+            border-left: 3.5px solid #F59E0B;
+        }
+
+        .feed-card.request-card.critical {
+            border-left: 3.5px solid #EF4444;
+        }
+
+        .feed-card.donor-card {
+            border-left: 3.5px solid #22C55E;
+        }
+
+        .feed-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .feed-card-title {
+            font-weight: 700;
+            font-size: 0.92rem;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .feed-card-sub {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin-top: 2px;
+        }
+
+        .feed-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
         /* ── How It Works / Roles Grid ───────────────────────── */
         .roles-section-wrapper {
             position: relative;
@@ -1622,6 +1837,12 @@
                     </div>
                 </div>
 
+                <!-- District Search Bar for Visitor Map Exploration -->
+                <div class="district-search-box">
+                    <span class="district-search-icon">🔍</span>
+                    <input type="text" id="districtSearchInput" class="district-search-input" placeholder="Search any of 64 Districts (e.g. Dhaka, Bogura, Sylhet, Chattogram, Khulna, Rajshahi...)" autocomplete="off" />
+                </div>
+
                 <!-- Sub Controls & Legend -->
                 <div class="map-sub-controls">
                     <div class="map-type-filters" id="mapTypeFilterGroup">
@@ -1656,6 +1877,24 @@
                         <span>Loading Bangladesh Live Blood Map...</span>
                     </div>
                     <div id="bloodMap"></div>
+                </div>
+
+                <!-- Real-Time Public Activity Stream & District Explorer Feed -->
+                <div class="live-feed-wrapper" id="liveFeedSection">
+                    <div class="feed-header-bar">
+                        <div class="feed-heading">
+                            <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#22C55E; box-shadow:0 0 10px #22C55E;"></span>
+                            Live Bangladesh Blood Stream
+                        </div>
+                        <div class="feed-tabs-filter" id="feedTabsFilter">
+                            <button type="button" class="feed-tab-btn active" data-feed="all">All Live Activity</button>
+                            <button type="button" class="feed-tab-btn" data-feed="requests">🚨 Emergency Requests</button>
+                            <button type="button" class="feed-tab-btn" data-feed="donors">🩸 Active Donors</button>
+                        </div>
+                    </div>
+                    <div class="public-feed-grid" id="publicFeedGrid">
+                        <!-- Populated dynamically via JS -->
+                    </div>
                 </div>
 
             </div>
@@ -1818,18 +2057,22 @@
 
     <!-- Interactive JavaScript Logic -->
     <script>
-        // Global API endpoint
+        // Global API endpoint (Auto-resolves Vercel serverless /api, local backend, and custom hosts)
         const API_BASE = (() => {
-            if (typeof window === 'undefined') return 'http://localhost:8000';
+            if (typeof window === 'undefined') return '';
+            if (window.API_BASE !== undefined && window.API_BASE !== null) return window.API_BASE;
             if (window.location.protocol === 'file:') return 'http://localhost:8000';
-            if (window.location.port === '8000') return '';
-            const protocol = window.location.protocol || 'http:';
             const hostname = window.location.hostname || 'localhost';
-            return `${protocol}//${hostname}:8000`;
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return window.location.port === '8000' ? '' : 'http://localhost:8000';
+            }
+            // On Vercel / Cloud deployments, API is hosted on the same origin under /api
+            return '';
         })();
+        window.API_BASE = API_BASE;
 
         // ────────────────────────────────────────────────────────
-        // 1. Check Authentication Status
+        // 1. Authentication Status
         // ────────────────────────────────────────────────────────
         function getAuthUser() {
             const token = localStorage.getItem('bloodreach_access_token') || sessionStorage.getItem('bloodreach_access_token');
@@ -1843,7 +2086,6 @@
             return auth.isLoggedIn && auth.role === 'SEEKER';
         }
 
-        // Update Header Navigation based on auth state
         function updateNavForAuth() {
             const auth = getAuthUser();
             const navActions = document.getElementById('navActions');
@@ -1852,16 +2094,16 @@
             if (auth.isLoggedIn) {
                 let dashboardUrl = 'dashboard-seeker.html';
                 if (auth.role === 'DONOR') dashboardUrl = 'dashboard-donor.html';
-                else if (auth.role === 'HOSPITAL') dashboardUrl = 'dashboard-hospital.html';
+                else if (auth.role === 'HOSPITAL' || auth.role === 'HOSPITAL_ADMIN') dashboardUrl = 'dashboard-hospital.html';
                 else if (auth.role === 'SUPERADMIN' || auth.role === 'ADMIN') dashboardUrl = 'dashboard-admin.html';
 
                 navActions.innerHTML = `
-          <a href="${dashboardUrl}" class="btn btn-ghost" style="border-color:rgba(239,68,68,0.4);">
-            👤 Dashboard (${auth.role})
-          </a>
-          <button class="btn btn-emergency" id="navEmergencyBtn">🚨 Emergency Request</button>
-          <button class="btn btn-ghost" id="logoutBtn" style="padding:0.5rem 0.85rem;">Logout</button>
-        `;
+                  <a href="${dashboardUrl}" class="btn btn-ghost" style="border-color:rgba(239,68,68,0.4);">
+                    👤 Dashboard (${auth.role})
+                  </a>
+                  <button class="btn btn-emergency" id="navEmergencyBtn">🚨 Emergency Request</button>
+                  <button class="btn btn-ghost" id="logoutBtn" style="padding:0.5rem 0.85rem;">Logout</button>
+                `;
 
                 const logoutBtn = document.getElementById('logoutBtn');
                 if (logoutBtn) {
@@ -1890,22 +2132,14 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            updateNavForAuth();
-            const navEmergencyBtn = document.getElementById('navEmergencyBtn');
-            const bottomEmergencyBtn = document.getElementById('bottomEmergencyBtn');
-            if (navEmergencyBtn) navEmergencyBtn.addEventListener('click', handleEmergencyClick);
-            if (bottomEmergencyBtn) bottomEmergencyBtn.addEventListener('click', handleEmergencyClick);
-        });
-
         // ────────────────────────────────────────────────────────
         // 3. Live Platform Statistics
         // ────────────────────────────────────────────────────────
+        // ────────────────────────────────────────────────────────
+        // 3. Live Platform Statistics (Real Database Records Only)
+        // ────────────────────────────────────────────────────────
         async function loadStats() {
             try {
-                if (window.CloudSync && typeof window.CloudSync.fetchCloudData === 'function') {
-                    await window.CloudSync.fetchCloudData();
-                }
                 if (API_BASE) {
                     const response = await fetch(`${API_BASE}/api/v1/analytics/stats`).catch(() => null);
                     if (response && response.ok) {
@@ -1913,7 +2147,7 @@
                         const donorsEl = document.getElementById('statDonorsCount');
                         const requestsEl = document.getElementById('statRequestsCount');
                         if (donorsEl) donorsEl.textContent = stats.total_donors || 0;
-                        if (requestsEl) requestsEl.textContent = stats.active_requests || 0;
+                        if (requestsEl) requestsEl.textContent = stats.pending_requests || stats.active_requests || 0;
                         return;
                     }
                 }
@@ -1922,37 +2156,11 @@
                 updateStatsCounter();
             }
         }
-        loadStats();
 
         // ────────────────────────────────────────────────────────
-        // 4. District Coordinates Map Dataset (All Bangladesh)
+        // 4. District Coordinates Dataset
         // ────────────────────────────────────────────────────────
-        const districtCoords = {
-            'Dhaka': [23.8103, 90.4125], 'Gazipur': [24.0023, 90.4267], 'Narayanganj': [23.6238, 90.5000],
-            'Narsingdi': [23.9193, 90.7176], 'Manikganj': [23.8617, 90.0003], 'Munshiganj': [23.5422, 90.5305],
-            'Kishoreganj': [24.4260, 90.9821], 'Tangail': [24.2513, 89.9167], 'Faridpur': [23.6071, 89.8429],
-            'Gopalganj': [23.0051, 89.8266], 'Madaripur': [23.1641, 90.1897], 'Rajbari': [23.7574, 89.6445],
-            'Shariatpur': [23.2423, 90.4348], 'Chattogram': [22.3569, 91.7832], 'Chittagong': [22.3569, 91.7832],
-            "Cox's Bazar": [21.4272, 92.0058], 'Coxs Bazar': [21.4272, 92.0058], 'Cumilla': [23.4682, 91.1788],
-            'Comilla': [23.4682, 91.1788], 'Feni': [23.0186, 91.3966], 'Brahmanbaria': [23.9571, 91.1119],
-            'Chandpur': [23.2333, 90.6667], 'Lakshmipur': [22.9425, 90.8412], 'Noakhali': [22.8696, 91.0994],
-            'Khagrachhari': [23.1193, 91.9847], 'Rangamati': [22.7324, 92.2985], 'Bandarban': [22.1953, 92.2184],
-            'Rajshahi': [24.3745, 88.6042], 'Bogura': [24.8465, 89.3770], 'Bogra': [24.8465, 89.3770],
-            'Joypurhat': [25.1015, 89.0277], 'Naogaon': [24.8103, 88.9416], 'Natore': [24.4206, 89.0003],
-            'Chapainawabganj': [24.5965, 88.2775], 'Nawabganj': [24.5965, 88.2775], 'Pabna': [24.0064, 89.2372],
-            'Sirajganj': [24.4534, 89.7006], 'Khulna': [22.8456, 89.5403], 'Bagerhat': [22.6516, 89.7859],
-            'Satkhira': [22.7185, 89.0705], 'Jashore': [23.1664, 89.2081], 'Jessore': [23.1664, 89.2081],
-            'Jhenaidah': [23.5450, 89.1726], 'Magura': [23.4873, 89.4198], 'Narail': [23.1725, 89.5127],
-            'Kushtia': [23.9013, 89.1205], 'Chuadanga': [23.6402, 88.8418], 'Meherpur': [23.7622, 88.6318],
-            'Barishal': [22.7010, 90.3535], 'Barisal': [22.7010, 90.3535], 'Barguna': [22.1570, 90.1256],
-            'Bhola': [22.6859, 90.6481], 'Jhalokati': [22.6406, 90.1987], 'Patuakhali': [22.3596, 90.3299],
-            'Pirojpur': [22.5841, 89.9720], 'Sylhet': [24.8949, 91.8687], 'Habiganj': [24.3750, 91.4167],
-            'Moulvibazar': [24.4829, 91.7774], 'Sunamganj': [25.0658, 91.3950], 'Rangpur': [25.7439, 89.2752],
-            'Dinajpur': [25.6217, 88.6355], 'Gaibandha': [25.3288, 89.5406], 'Kurigram': [25.8054, 89.6362],
-            'Lalmonirhat': [25.9923, 89.2847], 'Nilphamari': [25.9310, 88.8560], 'Panchagarh': [26.3411, 88.5541],
-            'Thakurgaon': [26.0336, 88.4616], 'Mymensingh': [24.7471, 90.4203], 'Jamalpur': [24.9375, 89.9377],
-            'Netrokona': [24.8703, 90.7279], 'Sherpur': [25.0204, 90.0152]
-        };
+        const districtCoords = window.CloudSync ? window.CloudSync.districtCoords : {};
 
         function resolveCoords(districtName) {
             if (!districtName) return null;
@@ -1966,40 +2174,40 @@
         }
 
         // ────────────────────────────────────────────────────────
-        // 5. Leaflet Map Engine with Instant Blood Group Filter
+        // 5. Leaflet Map & Live Activity Feed Engine
         // ────────────────────────────────────────────────────────
         let _leafletMap = null;
         let _mapMarkers = [];
+        let _markersByDistrict = {};
         let _donorsData = [];
         let _seekersData = [];
         let _selectedBloodGroup = ''; // '' means all
         let _selectedTypeFilter = 'all'; // 'all', 'donor', 'seeker'
+        let _activeFeedTab = 'all';
+        let _searchQuery = '';
 
-        // Create stylish pulsing SVG div icon
-        function createMapPinIcon(color, totalCount, isCritical, showCountBadge) {
+        function createMapPinIcon(color, totalCount, isCritical) {
             const r = 16;
             const size = r * 2 + 16;
 
             const pulseRing = isCritical
                 ? `<circle cx="${r}" cy="${r}" r="${r}" fill="none" stroke="${color}" stroke-width="2.5" opacity="0.85">
-             <animate attributeName="r" values="${r - 2};${r + 8};${r - 2}" dur="1.6s" repeatCount="indefinite"/>
-             <animate attributeName="opacity" values="0.85;0;0.85" dur="1.6s" repeatCount="indefinite"/>
-           </circle>`
+                     <animate attributeName="r" values="${r - 2};${r + 8};${r - 2}" dur="1.6s" repeatCount="indefinite"/>
+                     <animate attributeName="opacity" values="0.85;0;0.85" dur="1.6s" repeatCount="indefinite"/>
+                   </circle>`
                 : `<circle cx="${r}" cy="${r}" r="${r + 3}" fill="${color}" opacity="0.2"/>`;
 
-            const badgeText = showCountBadge
-                ? `<text x="${r}" y="${r + 4}" text-anchor="middle" font-family="Inter,sans-serif" font-weight="900" font-size="10" fill="#ffffff">${totalCount}</text>`
-                : `<circle cx="${r}" cy="${r}" r="${r - 8}" fill="#ffffff"/>`;
+            const badgeText = `<text x="${r}" y="${r + 4}" text-anchor="middle" font-family="Inter,sans-serif" font-weight="900" font-size="10" fill="#ffffff">${totalCount}</text>`;
 
             const svg = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size}" style="overflow:visible;">
-          <g transform="translate(8,8)">
-            ${pulseRing}
-            <circle cx="${r}" cy="${r}" r="${r - 2}" fill="${color}" stroke="#ffffff" stroke-width="2.5" filter="drop-shadow(0 3px 6px rgba(0,0,0,0.6))"/>
-            ${badgeText}
-          </g>
-        </svg>
-      `;
+                <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size}" style="overflow:visible;">
+                  <g transform="translate(8,8)">
+                    ${pulseRing}
+                    <circle cx="${r}" cy="${r}" r="${r - 2}" fill="${color}" stroke="#ffffff" stroke-width="2.5" filter="drop-shadow(0 3px 6px rgba(0,0,0,0.6))"/>
+                    ${badgeText}
+                  </g>
+                </svg>
+            `;
 
             return L.divIcon({
                 html: svg,
@@ -2015,9 +2223,9 @@
                 _mapMarkers.forEach(m => _leafletMap.removeLayer(m));
             }
             _mapMarkers = [];
+            _markersByDistrict = {};
         }
 
-        // Render Markers on Map based on filters & seeker login status
         function updateStatsCounter() {
             const donorsEl = document.getElementById('statDonorsCount');
             const requestsEl = document.getElementById('statRequestsCount');
@@ -2035,41 +2243,48 @@
 
             const seekerLoggedIn = isSeekerLoggedIn();
 
-            // Filter Donors by Blood Group
+            // Filter by Blood Group
             let filteredDonors = _donorsData;
             if (_selectedBloodGroup) {
-                filteredDonors = filteredDonors.filter(d => d.blood_group === _selectedBloodGroup);
+                filteredDonors = filteredDonors.filter(d => (d.blood_group || '').toUpperCase() === _selectedBloodGroup.toUpperCase());
             }
 
-            // Filter Seekers by Blood Group
             let filteredSeekers = _seekersData;
             if (_selectedBloodGroup) {
-                filteredSeekers = filteredSeekers.filter(s => s.blood_group === _selectedBloodGroup);
+                filteredSeekers = filteredSeekers.filter(s => (s.blood_group || '').toUpperCase() === _selectedBloodGroup.toUpperCase());
             }
 
-            // Aggregate counts by District
+            // Aggregate ONLY by District that has actual registered donors or requests
             const districtMap = {};
 
             if (_selectedTypeFilter !== 'seeker') {
                 filteredDonors.forEach(d => {
-                    const dist = d.district || 'Dhaka';
-                    if (!districtMap[dist]) districtMap[dist] = { donors: 0, seekers: 0, bloodGroups: new Set() };
-                    districtMap[dist].donors++;
-                    if (d.blood_group) districtMap[dist].bloodGroups.add(d.blood_group);
+                    const dist = typeof d.district === 'object' ? (d.district?.name || '') : (d.district || '');
+                    if (dist) {
+                        if (!districtMap[dist]) districtMap[dist] = { donors: 0, seekers: 0, donorItems: [], seekerItems: [], bloodGroups: new Set() };
+                        districtMap[dist].donors++;
+                        districtMap[dist].donorItems.push(d);
+                        if (d.blood_group) districtMap[dist].bloodGroups.add(d.blood_group);
+                    }
                 });
             }
 
             if (_selectedTypeFilter !== 'donor') {
                 filteredSeekers.forEach(s => {
-                    const dist = s.district || 'Dhaka';
-                    if (!districtMap[dist]) districtMap[dist] = { donors: 0, seekers: 0, bloodGroups: new Set() };
-                    districtMap[dist].seekers++;
-                    if (s.blood_group) districtMap[dist].bloodGroups.add(s.blood_group);
+                    const dist = typeof s.district === 'object' ? (s.district?.name || '') : (s.district || '');
+                    if (dist) {
+                        if (!districtMap[dist]) districtMap[dist] = { donors: 0, seekers: 0, donorItems: [], seekerItems: [], bloodGroups: new Set() };
+                        districtMap[dist].seekers++;
+                        districtMap[dist].seekerItems.push(s);
+                        if (s.blood_group) districtMap[dist].bloodGroups.add(s.blood_group);
+                    }
                 });
             }
 
-            // Place Markers on Leaflet Map
+            // Place Markers on Leaflet Map ONLY for districts with real data
             Object.entries(districtMap).forEach(([district, data]) => {
+                if (data.donors === 0 && data.seekers === 0) return;
+
                 const coords = resolveCoords(district);
                 if (!coords) return;
 
@@ -2078,197 +2293,242 @@
                 const hasBoth = hasDonors && hasSeekers;
 
                 let pinColor = '#EF4444'; // Red for Donors
-                if (hasBoth) pinColor = '#D946EF'; // Purple for Both
+                if (hasBoth) pinColor = '#D946EF'; // Violet for Both
                 else if (hasSeekers && !hasDonors) pinColor = '#F59E0B'; // Amber for Seekers
 
                 const totalCount = data.donors + data.seekers;
-                const icon = createMapPinIcon(pinColor, totalCount, hasSeekers, seekerLoggedIn);
+                const isCritical = data.seekerItems.some(s => s.urgency_level === 'CRITICAL');
+                const icon = createMapPinIcon(pinColor, totalCount, isCritical);
 
                 const groupsArray = Array.from(data.bloodGroups);
                 const groupTags = groupsArray.length > 0
                     ? groupsArray.map(g => `<span class="group-tag">${g}</span>`).join('')
                     : '<span class="group-tag">Available</span>';
 
-                // Conditional Popup: Seeker Logged In vs Guest
+                // Donor sample list
+                const donorListHtml = data.donorItems.slice(0, 3).map(d => `
+                    <div class="popup-list-item">
+                        <span>🩸 ${d.full_name || 'Registered Donor'}</span>
+                        <span class="badge-pill" style="background:rgba(239,68,68,0.25); color:#FCA5A5;">${d.blood_group || 'O+'}</span>
+                    </div>
+                `).join('');
+
+                // Seeker sample list
+                const seekerListHtml = data.seekerItems.slice(0, 3).map(s => `
+                    <div class="popup-list-item">
+                        <span>🚨 ${s.patient_name || 'Patient'} (${s.hospital_name || 'Hospital'})</span>
+                        <span class="badge-pill" style="background:rgba(245,158,11,0.25); color:#FCD34D;">${s.blood_group || 'O+'}</span>
+                    </div>
+                `).join('');
+
                 let popupHtml = '';
                 if (seekerLoggedIn) {
                     popupHtml = `
-            <div class="popup-content">
-              <div class="popup-title">📍 ${district}</div>
-              ${hasDonors ? `<div class="popup-info-row alert">🩸 ${data.donors} Donor${data.donors > 1 ? 's' : ''} Ready to Donate</div>` : '<div class="popup-info-row">No active donors currently</div>'}
-              ${hasSeekers ? `<div class="popup-info-row" style="color:#FBBF24;">⚠️ ${data.seekers} Emergency Request${data.seekers > 1 ? 's' : ''}</div>` : ''}
-              <div class="popup-badge-list">
-                <div>Blood Groups Present:</div>
-                <div style="margin-top:4px;">${groupTags}</div>
-              </div>
-              <a href="dashboard-seeker.html?district=${encodeURIComponent(district)}" class="popup-btn">
-                🩸 View Donors &amp; Request Blood
-              </a>
-            </div>
-          `;
+                        <div class="popup-content">
+                            <div class="popup-title">📍 ${district} District</div>
+                            ${hasDonors ? `<div class="popup-info-row alert">🩸 ${data.donors} Donor${data.donors > 1 ? 's' : ''} Ready to Donate</div>` : '<div class="popup-info-row">No donors currently registered</div>'}
+                            ${hasSeekers ? `<div class="popup-info-row" style="color:#FBBF24;">⚠️ ${data.seekers} Emergency Request${data.seekers > 1 ? 's' : ''}</div>` : ''}
+                            <div class="popup-badge-list">
+                                <div>Blood Groups Available:</div>
+                                <div style="margin-top:4px;">${groupTags}</div>
+                            </div>
+                            <div style="margin-bottom:0.6rem;">${donorListHtml}${seekerListHtml}</div>
+                            <a href="dashboard-seeker.html?district=${encodeURIComponent(district)}" class="popup-btn">
+                                🩸 View Donors &amp; Match Now
+                            </a>
+                        </div>
+                    `;
                 } else {
                     popupHtml = `
-            <div class="popup-content">
-              <div class="popup-title">📍 ${district}</div>
-              <div class="popup-info-row">
-                🩸 Status: <strong>Donors Active in Location</strong>
-              </div>
-              <div class="popup-badge-list">
-                <div>Blood Groups Available:</div>
-                <div style="margin-top:4px;">${groupTags}</div>
-              </div>
-              <div style="font-size:0.78rem; color:#94A3B8; margin-bottom:0.75rem; line-height:1.4;">
-                🔒 Sign in as a <strong>Seeker</strong> to view direct phone numbers &amp; request donors.
-              </div>
-              <a href="login.html?role=SEEKER&district=${encodeURIComponent(district)}" class="popup-btn">
-                🔑 Sign In / Register to See Numbers
-              </a>
-            </div>
-          `;
+                        <div class="popup-content">
+                            <div class="popup-title">📍 ${district} District</div>
+                            <div class="popup-info-row">
+                                🩸 Status: <strong>${data.donors} Registered Donors &bull; ${data.seekers} Emergency Requests</strong>
+                            </div>
+                            <div class="popup-badge-list">
+                                <div>Blood Groups Available:</div>
+                                <div style="margin-top:4px;">${groupTags}</div>
+                            </div>
+                            <div style="margin-bottom:0.6rem;">
+                                ${donorListHtml}
+                                ${seekerListHtml}
+                            </div>
+                            <div style="font-size:0.78rem; color:#94A3B8; margin-bottom:0.75rem; line-height:1.4;">
+                                🔒 Sign in or register as a <strong>Seeker</strong> to unlock full phone contacts &amp; send instant emergency alerts.
+                            </div>
+                            <a href="login.html?role=SEEKER&district=${encodeURIComponent(district)}" class="popup-btn">
+                                🔑 Sign In / Register to Request
+                            </a>
+                            <a href="tel:999" class="popup-btn secondary">
+                                📞 National Emergency (999)
+                            </a>
+                        </div>
+                    `;
                 }
 
                 const marker = L.marker(coords, { icon })
                     .addTo(_leafletMap)
-                    .bindPopup(popupHtml, { maxWidth: 260, className: 'custom-blood-popup' });
+                    .bindPopup(popupHtml, { maxWidth: 280, className: 'custom-blood-popup' });
 
                 _mapMarkers.push(marker);
+                _markersByDistrict[district.toLowerCase()] = marker;
             });
+
+            renderPublicFeed();
         }
 
-        // Fetch live data from backend and persistent store
-        async function loadMapData() {
-            if (window.CloudSync && typeof window.CloudSync.fetchCloudData === 'function') {
-                try {
-                    await window.CloudSync.fetchCloudData();
-                } catch (e) {}
+        // Render Live Public Activity Stream Cards
+        function renderPublicFeed() {
+            const feedGrid = document.getElementById('publicFeedGrid');
+            if (!feedGrid) return;
+
+            let items = [];
+
+            if (_activeFeedTab === 'all' || _activeFeedTab === 'requests') {
+                _seekersData.forEach(s => {
+                    const distName = typeof s.district === 'object' ? (s.district?.name || 'Dhaka') : (s.district || 'Dhaka');
+                    items.push({
+                        type: 'request',
+                        district: distName,
+                        title: s.patient_name || 'Emergency Patient',
+                        sub: `🏥 ${s.hospital_name || s.hospital || 'Hospital'} &bull; ${s.units_needed || 1} Unit(s)`,
+                        blood_group: s.blood_group || 'O+',
+                        urgency: s.urgency_level || 'CRITICAL',
+                        date: s.created_at ? new Date(s.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Live'
+                    });
+                });
             }
 
-            let backendDonors = null;
-            let backendSeekers = null;
+            if (_activeFeedTab === 'all' || _activeFeedTab === 'donors') {
+                _donorsData.forEach(d => {
+                    const distName = typeof d.district === 'object' ? (d.district?.name || 'Dhaka') : (d.district || 'Dhaka');
+                    items.push({
+                        type: 'donor',
+                        district: distName,
+                        title: d.full_name || 'Registered Donor',
+                        sub: `🩸 ${d.total_donations || 0} Previous Donations &bull; Ready to donate`,
+                        blood_group: d.blood_group || 'O+',
+                        urgency: 'AVAILABLE',
+                        date: 'Online'
+                    });
+                });
+            }
+
+            // Apply search filter
+            if (_searchQuery) {
+                const q = _searchQuery.toLowerCase().trim();
+                items = items.filter(it => 
+                    (it.district && it.district.toLowerCase().includes(q)) ||
+                    (it.blood_group && it.blood_group.toLowerCase().includes(q)) ||
+                    (it.title && it.title.toLowerCase().includes(q))
+                );
+            }
+
+            if (items.length === 0) {
+                if (_searchQuery) {
+                    feedGrid.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 2.5rem 1.5rem; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px dashed var(--border-color);">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">📍</div>
+                            <div style="font-weight: 700; color: var(--text-primary); font-size: 1.05rem; margin-bottom: 0.35rem;">
+                                No registered donors or active blood requests in "${_searchQuery}" yet.
+                            </div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+                                Be the first donor or post an emergency request for this location.
+                            </div>
+                            <a href="register.html?district=${encodeURIComponent(_searchQuery)}" class="btn btn-primary" style="display:inline-flex; font-size:0.85rem; padding:0.5rem 1rem;">
+                                🩸 Register as Donor in ${_searchQuery}
+                            </a>
+                        </div>
+                    `;
+                } else {
+                    feedGrid.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 2.5rem 1.5rem; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px dashed var(--border-color);">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🩸</div>
+                            <div style="font-weight: 700; color: var(--text-primary); font-size: 1.05rem; margin-bottom: 0.35rem;">
+                                Fresh Platform — Awaiting First Registrations
+                            </div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+                                Real-time registered donors and seeker requests will appear here as users sign up.
+                            </div>
+                            <a href="register.html" class="btn btn-primary" style="display:inline-flex; font-size:0.85rem; padding:0.5rem 1rem;">
+                                🩸 Join as Blood Donor
+                            </a>
+                        </div>
+                    `;
+                }
+                return;
+            }
+
+            feedGrid.innerHTML = items.slice(0, 18).map(it => {
+                const isReq = it.type === 'request';
+                const cardClass = isReq ? (it.urgency === 'CRITICAL' ? 'feed-card request-card critical' : 'feed-card request-card') : 'feed-card donor-card';
+                const tagColor = isReq ? (it.urgency === 'CRITICAL' ? '#EF4444' : '#F59E0B') : '#22C55E';
+                const tagText = isReq ? `🚨 ${it.urgency}` : '✔ Available';
+
+                return `
+                    <div class="${cardClass}" onclick="focusDistrict('${it.district}')">
+                        <div>
+                            <div class="feed-card-header">
+                                <div class="feed-card-title">${it.title}</div>
+                                <span class="group-tag" style="background:rgba(239,68,68,0.25); color:#FCA5A5; font-weight:800;">${it.blood_group}</span>
+                            </div>
+                            <div class="feed-card-sub">${it.sub}</div>
+                        </div>
+                        <div class="feed-card-footer">
+                            <span>📍 ${it.district}</span>
+                            <span style="color:${tagColor}; font-weight:700;">${tagText} &bull; ${it.date}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.focusDistrict = function(distName) {
+            if (!distName) return;
+            const coords = resolveCoords(distName);
+            if (coords && _leafletMap) {
+                _leafletMap.flyTo(coords, 10, { duration: 1.2 });
+                const marker = _markersByDistrict[distName.toLowerCase()];
+                if (marker) {
+                    setTimeout(() => marker.openPopup(), 1300);
+                }
+            }
+            const mapSection = document.getElementById('mapSection');
+            if (mapSection) mapSection.scrollIntoView({ behavior: 'smooth' });
+        };
+
+        // Fetch live data directly from Database / Backend API
+        async function loadMapData() {
+            let donors = [];
+            let requests = [];
 
             if (API_BASE) {
                 try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 2000);
-                    const [donorsRes, seekersRes] = await Promise.all([
-                        fetch(`${API_BASE}/api/v1/donors/search?is_available_only=true`, { signal: controller.signal }).catch(() => null),
-                        fetch(`${API_BASE}/api/v1/requests/public`, { signal: controller.signal }).catch(() => null)
+                    const [donorsRes, reqsRes] = await Promise.all([
+                        fetch(`${API_BASE}/api/v1/donors/search?is_available_only=false`).catch(() => null),
+                        fetch(`${API_BASE}/api/v1/requests/public`).catch(() => null)
                     ]);
-                    clearTimeout(timeoutId);
-                    if (donorsRes && donorsRes.ok) backendDonors = await donorsRes.json();
-                    if (seekersRes && seekersRes.ok) backendSeekers = await seekersRes.json();
+                    if (donorsRes && donorsRes.ok) {
+                        donors = await donorsRes.json();
+                    }
+                    if (reqsRes && reqsRes.ok) {
+                        requests = await reqsRes.json();
+                    }
+                } catch (e) {
+                    console.warn('API load error:', e);
+                }
+            }
+
+            // If offline, fallback to genuine session storage via CloudSync
+            if (donors.length === 0 && requests.length === 0 && window.CloudSync) {
+                try {
+                    donors = await window.CloudSync.getPublicDonors();
+                    requests = await window.CloudSync.getPublicRequests();
                 } catch (e) {}
             }
 
-            let localUsers = [];
-            let localRequests = [];
-            try {
-                localUsers = JSON.parse(localStorage.getItem('bloodreach_users_db') || '[]');
-                localRequests = JSON.parse(localStorage.getItem('bloodreach_requests_db') || '[]');
-            } catch (e) { }
-
-            // Build Unified Donors List (Merge real local/cloud registered donors + backend donors)
-            const donorsList = [];
-            const donorKeySet = new Set();
-
-            // 1. Add real local/cloud registered donors
-            localUsers.filter(u => u.role === 'DONOR').forEach((u, i) => {
-                const phoneKey = (u.phone || '').replace(/[^0-9]/g, '');
-                const emailKey = (u.email || '').toLowerCase().trim();
-                const key = phoneKey || emailKey || (u.id || `LOCAL_DONOR_${i}`);
-                if (!donorKeySet.has(key)) {
-                    donorKeySet.add(key);
-                    donorsList.push({
-                        id: u.id || `LOCAL_DONOR_${i}`,
-                        full_name: u.full_name || u.name || 'Registered Donor',
-                        blood_group: u.blood_group || (u.donor_profile?.blood_group) || 'O+',
-                        district: typeof u.district === 'object' ? (u.district?.name || 'Dhaka') : (u.district || 'Dhaka'),
-                        phone: u.phone,
-                        is_available: u.donor_profile ? (u.donor_profile.is_available !== false) : true
-                    });
-                }
-            });
-
-            // 2. Merge backend donors
-            if (Array.isArray(backendDonors)) {
-                backendDonors.forEach(d => {
-                    const phoneKey = (d.phone || '').replace(/[^0-9]/g, '');
-                    const key = phoneKey || (d.donor_id || d.id);
-                    if (!donorKeySet.has(key)) {
-                        donorKeySet.add(key);
-                        donorsList.push({
-                            id: d.donor_id || d.id,
-                            full_name: d.full_name || d.name || 'Verified Donor',
-                            blood_group: d.blood_group || 'O+',
-                            district: typeof d.district === 'object' ? (d.district?.name || 'Dhaka') : (d.district || 'Dhaka'),
-                            phone: d.phone,
-                            is_available: d.is_available !== false
-                        });
-                    }
-                });
-            }
-
-            // Build Unified Seekers List (Merge real local/cloud requests + registered seeker users + backend requests)
-            const seekersList = [];
-            const seekerKeySet = new Set();
-
-            // 1. Add real local/cloud blood requests
-            localRequests.forEach((r, i) => {
-                const reqKey = r.id || r.request_id || `${r.phone}_${r.blood_group}_${r.district}`;
-                if (!seekerKeySet.has(reqKey)) {
-                    seekerKeySet.add(reqKey);
-                    seekersList.push({
-                        id: r.id || r.request_id || `REQ_${i}`,
-                        patient_name: r.patient_name || 'Emergency Patient',
-                        blood_group: r.blood_group || 'O+',
-                        district: typeof r.district === 'object' ? (r.district?.name || 'Dhaka') : (r.district || 'Dhaka'),
-                        hospital: r.hospital_name || r.hospital || 'Hospital',
-                        phone: r.phone || r.contact_phone || '',
-                        status: r.status || 'OPEN'
-                    });
-                }
-            });
-
-            // 2. Add registered seeker users who have registered in the area
-            localUsers.filter(u => u.role === 'SEEKER').forEach((u, i) => {
-                const phoneKey = (u.phone || '').replace(/[^0-9]/g, '');
-                const emailKey = (u.email || '').toLowerCase().trim();
-                const key = phoneKey || emailKey || (u.id || `SEEKER_${i}`);
-                if (!seekerKeySet.has(key)) {
-                    seekerKeySet.add(key);
-                    seekersList.push({
-                        id: u.id || `SEEKER_${i}`,
-                        patient_name: u.full_name || u.name || 'Registered Seeker',
-                        blood_group: u.blood_group || 'O+',
-                        district: typeof u.district === 'object' ? (u.district?.name || 'Dhaka') : (u.district || 'Dhaka'),
-                        hospital: 'Seeking Blood in District',
-                        phone: u.phone,
-                        status: 'OPEN'
-                    });
-                }
-            });
-
-            // 3. Merge backend public requests
-            if (Array.isArray(backendSeekers)) {
-                backendSeekers.forEach(r => {
-                    const reqKey = r.request_id || r.id;
-                    if (!seekerKeySet.has(reqKey)) {
-                        seekerKeySet.add(reqKey);
-                        seekersList.push({
-                            id: r.request_id || r.id,
-                            patient_name: r.patient_name || (r.seeker ? r.seeker.full_name : 'Patient'),
-                            blood_group: r.blood_group || 'O+',
-                            district: typeof r.district === 'object' ? (r.district?.name || 'Dhaka') : (r.district || 'Dhaka'),
-                            hospital: r.hospital_name || r.hospital || 'Hospital Clinic',
-                            phone: r.phone || r.contact_phone || '',
-                            status: r.status || 'OPEN'
-                        });
-                    }
-                });
-            }
-
-            _donorsData = donorsList;
-            _seekersData = seekersList;
+            _donorsData = Array.isArray(donors) ? donors : [];
+            _seekersData = Array.isArray(requests) ? requests : [];
 
             renderMap();
         }
@@ -2288,7 +2548,6 @@
                 return;
             }
 
-            // Initialize map centered at Bangladesh
             _leafletMap = L.map('bloodMap', {
                 center: [23.8103, 90.4125],
                 zoom: 7,
@@ -2299,7 +2558,6 @@
                 preferCanvas: true
             });
 
-            // OpenStreetMap Tile Layer
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
                 subdomains: 'abc',
@@ -2309,13 +2567,8 @@
             const overlay = document.getElementById('mapLoadingOverlay');
             if (overlay) overlay.style.display = 'none';
 
-            setTimeout(() => {
-                if (_leafletMap) _leafletMap.invalidateSize();
-            }, 200);
-
-            setTimeout(() => {
-                if (_leafletMap) _leafletMap.invalidateSize();
-            }, 600);
+            setTimeout(() => { if (_leafletMap) _leafletMap.invalidateSize(); }, 200);
+            setTimeout(() => { if (_leafletMap) _leafletMap.invalidateSize(); }, 600);
 
             window.addEventListener('resize', () => {
                 if (_leafletMap) _leafletMap.invalidateSize();
@@ -2325,7 +2578,7 @@
         }
 
         // ────────────────────────────────────────────────────────
-        // 7. Mobile Drawer Interaction Handlers
+        // 6. Mobile Drawer Handlers
         // ────────────────────────────────────────────────────────
         function openMobileDrawer() {
             const drawer = document.getElementById('mobileDrawer');
@@ -2347,6 +2600,8 @@
         window.openMobileDrawer = openMobileDrawer;
 
         document.addEventListener('DOMContentLoaded', () => {
+            updateNavForAuth();
+            loadStats();
             initBloodMap();
 
             // Blood Group buttons listener
@@ -2355,7 +2610,7 @@
                 btn.addEventListener('click', () => {
                     bgFilterButtons.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
-                    _selectedBloodGroup = btn.dataset.bg || ''; // '' means all
+                    _selectedBloodGroup = btn.dataset.bg || '';
                     renderMap();
                 });
             });
@@ -2371,6 +2626,37 @@
                 });
             });
 
+            // District search input listener
+            const districtSearchInput = document.getElementById('districtSearchInput');
+            if (districtSearchInput) {
+                districtSearchInput.addEventListener('input', (e) => {
+                    _searchQuery = e.target.value;
+                    renderPublicFeed();
+                    const cleanQ = _searchQuery.trim().toLowerCase();
+                    if (cleanQ && districtCoords) {
+                        for (const [dist, coords] of Object.entries(districtCoords)) {
+                            if (dist.toLowerCase() === cleanQ || dist.toLowerCase().startsWith(cleanQ)) {
+                                if (_leafletMap) _leafletMap.flyTo(coords, 9, { duration: 0.8 });
+                                const marker = _markersByDistrict[dist.toLowerCase()];
+                                if (marker) marker.openPopup();
+                                break;
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Feed tabs filter listeners
+            const feedTabBtns = document.querySelectorAll('.feed-tab-btn');
+            feedTabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    feedTabBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    _activeFeedTab = btn.dataset.feed || 'all';
+                    renderPublicFeed();
+                });
+            });
+
             const mobileMenuToggle = document.getElementById('mobileMenuToggle');
             const mobileDrawerClose = document.getElementById('mobileDrawerClose');
             const mobileDrawerOverlay = document.getElementById('mobileDrawerOverlay');
@@ -2378,8 +2664,21 @@
             if (mobileMenuToggle) mobileMenuToggle.addEventListener('click', openMobileDrawer);
             if (mobileDrawerClose) mobileDrawerClose.addEventListener('click', closeMobileDrawer);
             if (mobileDrawerOverlay) mobileDrawerOverlay.addEventListener('click', closeMobileDrawer);
+
+            const navEmergencyBtn = document.getElementById('navEmergencyBtn');
+            const bottomEmergencyBtn = document.getElementById('bottomEmergencyBtn');
+            if (navEmergencyBtn) navEmergencyBtn.addEventListener('click', handleEmergencyClick);
+            if (bottomEmergencyBtn) bottomEmergencyBtn.addEventListener('click', handleEmergencyClick);
+
+            // Real-time CloudSync event listener
+            if (window.CloudSync && typeof window.CloudSync.subscribe === 'function') {
+                window.CloudSync.subscribe(() => {
+                    loadStats();
+                    loadMapData();
+                });
+            }
         });
     </script>
 </body>
 
-</html>
+</html>

@@ -157,39 +157,24 @@ from fastapi.responses import FileResponse, HTMLResponse
 
 BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(BACKEND_DIR)
+FRONTEND_DIR = os.path.join(ROOT_DIR, "frontend")
 
-SEARCH_DIRS = [
-    os.path.join(BACKEND_DIR, "frontend"),
-    os.path.join(BACKEND_DIR, "assets"),
-    os.path.join(ROOT_DIR, "frontend"),
-    ROOT_DIR,
-    BACKEND_DIR,
-]
-
-def find_file(relative_path: str):
-    for d in SEARCH_DIRS:
-        target = os.path.join(d, relative_path)
-        if os.path.exists(target) and os.path.isfile(target):
-            return target
-    return None
-
-# Mount assets directory if available
-for d in [os.path.join(BACKEND_DIR, "assets"), os.path.join(BACKEND_DIR, "frontend", "assets"), os.path.join(ROOT_DIR, "assets"), os.path.join(ROOT_DIR, "frontend", "assets")]:
-    if os.path.exists(d) and os.path.isdir(d):
-        app.mount("/assets", StaticFiles(directory=d), name="assets")
-        break
+# Mount assets directory
+assets_dir = os.path.join(FRONTEND_DIR, "assets")
+if os.path.exists(assets_dir):
+    app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_index():
-    path = find_file("index.html")
-    if path:
+    path = os.path.join(FRONTEND_DIR, "index.html")
+    if os.path.exists(path):
         return FileResponse(path)
-    return HTMLResponse("<h1>BloodReach BD</h1><p>Welcome to BloodReach BD</p>")
+    return HTMLResponse("<h1>BloodReach BD</h1><p>Frontend file not found</p>")
 
 @app.get("/{page}.html", response_class=HTMLResponse)
 async def serve_html_page(page: str):
-    path = find_file(f"{page}.html")
-    if path:
+    path = os.path.join(FRONTEND_DIR, f"{page}.html")
+    if os.path.exists(path):
         return FileResponse(path)
     return HTMLResponse(status_code=404, content="<h1>404 — Page Not Found</h1>")
 

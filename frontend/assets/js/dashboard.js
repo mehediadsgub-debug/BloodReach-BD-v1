@@ -125,15 +125,13 @@ function updateDistrictDropdown(divisionVal, selectedDistrictVal) {
 
 /* ── API Base URL Resolution ────────────────────────── */
 window.API_BASE = (() => {
-  if (typeof window === 'undefined') return 'http://localhost:8000';
+  if (typeof window === 'undefined') return '';
   if (window.location.protocol === 'file:') return 'http://localhost:8000';
-  if (window.location.port === '8000') return '';
   const hostname = window.location.hostname || 'localhost';
-  if (hostname.includes('vercel.app') || hostname.includes('netlify.app') || hostname.includes('github.io')) {
-    return '';
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return window.location.port === '8000' ? '' : 'http://localhost:8000';
   }
-  const protocol = window.location.protocol || 'http:';
-  return `${protocol}//${hostname}:8000`;
+  return '';
 })();
 
 /* ── Load Profile ───────────────────────────────────── */

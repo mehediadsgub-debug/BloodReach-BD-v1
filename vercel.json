@@ -1,5 +1,66 @@
 {
+  "version": 2,
   "cleanUrls": true,
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "frontend/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/docs",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/openapi.json",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "/frontend/assets/$1"
+    },
+    {
+      "src": "/",
+      "dest": "/frontend/index.html"
+    },
+    {
+      "src": "/login",
+      "dest": "/frontend/login.html"
+    },
+    {
+      "src": "/register",
+      "dest": "/frontend/register.html"
+    },
+    {
+      "src": "/dashboard-donor",
+      "dest": "/frontend/dashboard-donor.html"
+    },
+    {
+      "src": "/dashboard-seeker",
+      "dest": "/frontend/dashboard-seeker.html"
+    },
+    {
+      "src": "/dashboard-admin",
+      "dest": "/frontend/dashboard-admin.html"
+    },
+    {
+      "src": "/dashboard-hospital",
+      "dest": "/frontend/dashboard-hospital.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/frontend/$1"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
@@ -17,36 +78,6 @@
           "value": "0"
         }
       ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/login",
-      "destination": "/login.html"
-    },
-    {
-      "source": "/register",
-      "destination": "/register.html"
-    },
-    {
-      "source": "/dashboard-donor",
-      "destination": "/dashboard-donor.html"
-    },
-    {
-      "source": "/dashboard-seeker",
-      "destination": "/dashboard-seeker.html"
-    },
-    {
-      "source": "/dashboard-admin",
-      "destination": "/dashboard-admin.html"
-    },
-    {
-      "source": "/dashboard-hospital",
-      "destination": "/dashboard-hospital.html"
     }
   ]
 }

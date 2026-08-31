@@ -524,8 +524,15 @@
   <script src="assets/js/cloud-sync.js"></script>
   <script src="assets/js/dashboard.js"></script>
   <script>
-    // ── Global State ──
-    window.API_BASE = (window.location.port === '8000' && window.location.protocol !== 'file:') ? '' : 'http://localhost:8000';
+    window.API_BASE = (() => {
+      if (typeof window === 'undefined') return '';
+      if (window.location.protocol === 'file:') return 'http://localhost:8000';
+      const hostname = window.location.hostname || 'localhost';
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return window.location.port === '8000' ? '' : 'http://localhost:8000';
+      }
+      return '';
+    })();
     let queueData = [];
     let currentFilter = 'PENDING';
     let activeInspectRequest = null;

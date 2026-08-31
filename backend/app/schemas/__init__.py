@@ -371,9 +371,13 @@ class PublicBloodRequestResponse(BaseModel):
     units_needed: int
     urgency_level: UrgencyLevel
     required_by: Optional[date] = None
+    patient_name: Optional[str] = None
+    hospital_name: Optional[str] = None
+    status: Optional[str] = None
     district: Optional[str] = None
     division: Optional[str] = None
     created_at: datetime
+
 
 
 # ── Request Match schemas ─────────────────────────────────────

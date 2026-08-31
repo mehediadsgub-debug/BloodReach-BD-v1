@@ -602,8 +602,15 @@
 
   <!-- Seeker Dashboard Logic + 100 KM Live Interactive Map -->
   <script>
-    // Global API base
-    window.API_BASE = (window.location.port === '8000' && window.location.protocol !== 'file:') ? '' : 'http://localhost:8000';
+    window.API_BASE = (() => {
+      if (typeof window === 'undefined') return '';
+      if (window.location.protocol === 'file:') return 'http://localhost:8000';
+      const hostname = window.location.hostname || 'localhost';
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return window.location.port === '8000' ? '' : 'http://localhost:8000';
+      }
+      return '';
+    })();
 
     // ── Seeker UI Element References ─────────────────────────
     const requestModal   = document.getElementById('requestModal');
@@ -1464,13 +1471,14 @@
 
       let localUsers = [];
       try {
-        localUsers = JSON.parse(localStorage.getItem('bloodreach_users_db') || '[]');
+        const stored = JSON.parse(localStorage.getItem('bloodreach_users_db') || '[]');
+        localUsers = Array.isArray(stored) ? stored.filter(u => u && !String(u.id || '').startsWith('usr_')) : [];
       } catch (e) {}
 
       const unifiedDonors = [];
       const seenDonorKeys = new Set();
 
-      // 1. Add real local and CloudSync registered donors
+      // 1. Add authentic local and cloud registered donors
       localUsers.filter(u => u.role === 'DONOR').forEach((u, i) => {
         const phoneKey = (u.phone || '').replace(/[^0-9]/g, '');
         const emailKey = (u.email || '').toLowerCase().trim();
@@ -1478,20 +1486,20 @@
         if (!seenDonorKeys.has(key)) {
           seenDonorKeys.add(key);
           unifiedDonors.push({
-            id: u.id || (500 + i),
+            id: u.id || u.user_id || (500 + i),
             name: u.full_name || u.name || 'Registered Donor',
             blood_group: u.blood_group || (u.donor_profile?.blood_group) || 'O+',
             district: typeof u.district === 'object' ? (u.district?.name || 'Dhaka') : (u.district || 'Dhaka'),
             division: typeof u.division === 'object' ? (u.division?.name || 'Dhaka') : (u.division || 'Dhaka'),
-            phone: u.phone,
+            phone: u.phone || null,
             is_phone_unlocked: true,
             is_available: u.donor_profile ? (u.donor_profile.is_available !== false) : true,
-            last_donation: 'Ready to donate'
+            last_donation: u.donor_profile?.last_donation_date || 'Ready to donate'
           });
         }
       });
 
-      // 2. Add backend donors
+      // 2. Add backend database donors
       backendDonors.forEach((d, i) => {
         const phoneKey = (d.phone || '').replace(/[^0-9]/g, '');
         const key = phoneKey || (d.donor_id || d.id || `BACKEND_DONOR_${i}`);
@@ -1499,14 +1507,14 @@
           seenDonorKeys.add(key);
           unifiedDonors.push({
             id: d.donor_id || d.id || (200 + i),
-            name: d.full_name || d.name || `Donor #${i + 1}`,
+            name: d.full_name || d.name || 'Registered Donor',
             blood_group: d.blood_group || 'O+',
             district: d.district?.name || d.district || 'Dhaka',
             division: d.district?.division?.name || d.division || 'Dhaka',
             phone: d.phone || null,
             is_phone_unlocked: !!d.is_phone_unlocked && !!d.phone,
             is_available: d.is_available !== false,
-            last_donation: d.last_donation_date ? d.last_donation_date.slice(0, 10) : 'Ready'
+            last_donation: d.last_donation_date ? d.last_donation_date.slice(0, 10) : 'Ready to donate'
           });
         }
       });
@@ -1548,6 +1556,13 @@
       if (token) {
         fetchRequests();
         initSeekerMap();
+      }
+
+      if (window.CloudSync && typeof window.CloudSync.subscribe === 'function') {
+        window.CloudSync.subscribe(() => {
+          fetchRequests();
+          initSeekerMap();
+        });
       }
     });
   </script>
