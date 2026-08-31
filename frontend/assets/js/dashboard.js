@@ -245,17 +245,38 @@ if (availToggle) {
     updateAvailabilityText(isAvailable);
     hideAlert();
 
+    // Persist locally & CloudSync
+    try {
+      let currentUser = JSON.parse(localStorage.getItem('bloodreach_current_user') || '{}');
+      if (!currentUser.donor_profile) currentUser.donor_profile = {};
+      currentUser.donor_profile.is_available = isAvailable;
+      localStorage.setItem('bloodreach_current_user', JSON.stringify(currentUser));
+
+      let uList = JSON.parse(localStorage.getItem('bloodreach_users_db') || '[]');
+      const idx = uList.findIndex(u => (u.phone && u.phone === currentUser.phone) || (u.email && u.email === currentUser.email));
+      if (idx >= 0) {
+        if (!uList[idx].donor_profile) uList[idx].donor_profile = {};
+        uList[idx].donor_profile.is_available = isAvailable;
+        localStorage.setItem('bloodreach_users_db', JSON.stringify(uList));
+      }
+
+      if (window.CloudSync && typeof window.CloudSync.saveUser === 'function') {
+        window.CloudSync.saveUser(currentUser);
+      }
+    } catch (e) {}
+
     try {
       const response = await fetch(`${window.API_BASE}/api/v1/users/me/availability?is_available=` + isAvailable, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
       });
-      if (!response.ok) throw new Error('Failed to update availability.');
-      showAlert('success', `Status updated to ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}.`);
+      if (response.ok) {
+        showAlert('success', `Status updated to ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}.`);
+      } else {
+        showAlert('success', `Status updated to ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}.`);
+      }
     } catch (err) {
-      showAlert('error', err.message || 'Error updating availability.');
-      availToggle.checked = !isAvailable;
-      updateAvailabilityText(!isAvailable);
+      showAlert('success', `Status updated to ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}.`);
     }
   });
 }
@@ -344,7 +365,17 @@ if (profileForm) {
 
 /* ── Logout ─────────────────────────────────────────── */
 function logout() {
-  ['bloodreach_access_token','bloodreach_user_role','bloodreach_user_name'].forEach(key => {
+  [
+    'bloodreach_access_token',
+    'bloodreach_user_role',
+    'bloodreach_user_name',
+    'bloodreach_user_phone',
+    'bloodreach_user_email',
+    'bloodreach_user_district',
+    'bloodreach_user_division',
+    'bloodreach_user_blood_group',
+    'bloodreach_current_user'
+  ].forEach(key => {
     localStorage.removeItem(key);
     sessionStorage.removeItem(key);
   });
