@@ -1,3 +1,18 @@
 {
-  "outputDirectory": "frontend"
+  "outputDirectory": "frontend",
+  "cleanUrls": true,
+  "routes": [
+    {
+      "src": "/assets/(.*)",
+      "dest": "/frontend/assets/$1"
+    },
+    {
+      "src": "/(.*\\.(?:html|css|js|png|jpg|jpeg|gif|svg|ico|json|woff|woff2|ttf))",
+      "dest": "/frontend/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/frontend/index.html"
+    }
+  ]
 }
