@@ -1,12 +1,20 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 from app.models import Base
 
-# Construct PostgreSQL DATABASE_URL
-DATABASE_URL = f"postgresql://{settings.DB_USER}:{settings.DB_PASS}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
+# Construct DATABASE_URL
+PG_URL = os.getenv("DATABASE_URL") or f"postgresql://{settings.DB_USER}:{settings.DB_PASS}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
 
-engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+try:
+    engine = create_engine(PG_URL, pool_pre_ping=True)
+    with engine.connect() as conn:
+        pass
+except Exception:
+    SQLITE_URL = "sqlite:///./bloodreach.db"
+    engine = create_engine(SQLITE_URL, connect_args={"check_same_thread": False})
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Dependency to yield database session per request

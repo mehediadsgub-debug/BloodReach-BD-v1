@@ -414,15 +414,43 @@ if (registerForm) {
 
     setLoading(true);
 
-    const executeDemoRegistration = () => {
-      localStorage.setItem('bloodreach_access_token', 'demo-token-' + Date.now());
-      localStorage.setItem('bloodreach_user_role', selectedRole);
-      localStorage.setItem('bloodreach_user_name', name);
-      if (selectedRole === 'DONOR' && districtSelect && districtSelect.value) {
-        localStorage.setItem('bloodreach_user_district', districtSelect.value);
-      }
+    const saveUserRecord = (token, role) => {
+      const userRecord = {
+        id: 'usr_' + Date.now(),
+        full_name: name,
+        name: name,
+        phone: phone,
+        email: email || `${phone}@bloodreach.local`,
+        password: password,
+        role: selectedRole,
+        blood_group: selectedRole === 'DONOR' ? (bloodGroupSelect ? bloodGroupSelect.value : '') : null,
+        division: selectedRole === 'DONOR' ? (divisionSelect ? divisionSelect.value : '') : null,
+        district: selectedRole === 'DONOR' ? (districtSelect ? districtSelect.value : '') : null,
+        created_at: new Date().toISOString()
+      };
 
-      showAlert('success', `⚡ Demo Mode: Account created! Redirecting to ${selectedRole} dashboard...`);
+      try {
+        const usersList = JSON.parse(localStorage.getItem('bloodreach_users_db') || '[]');
+        const existingIdx = usersList.findIndex(u => (u.phone && u.phone === phone) || (u.email && u.email === userRecord.email));
+        if (existingIdx >= 0) {
+          usersList[existingIdx] = { ...usersList[existingIdx], ...userRecord };
+        } else {
+          usersList.push(userRecord);
+        }
+        localStorage.setItem('bloodreach_users_db', JSON.stringify(usersList));
+      } catch (e) {}
+
+      localStorage.setItem('bloodreach_access_token', token || ('token_' + Date.now()));
+      localStorage.setItem('bloodreach_user_role', role || selectedRole);
+      localStorage.setItem('bloodreach_user_name', name);
+      localStorage.setItem('bloodreach_user_phone', phone);
+      localStorage.setItem('bloodreach_user_email', userRecord.email);
+      if (userRecord.district) localStorage.setItem('bloodreach_user_district', userRecord.district);
+      if (userRecord.division) localStorage.setItem('bloodreach_user_division', userRecord.division);
+      if (userRecord.blood_group) localStorage.setItem('bloodreach_user_blood_group', userRecord.blood_group);
+      localStorage.setItem('bloodreach_current_user', JSON.stringify(userRecord));
+
+      showAlert('success', 'Account registered successfully! Redirecting...');
       setTimeout(() => {
         const dashboardMap = {
           DONOR: 'dashboard-donor.html',
@@ -433,12 +461,12 @@ if (registerForm) {
           ADMIN: 'dashboard-admin.html',
         };
         window.location.href = dashboardMap[selectedRole] || 'index.html';
-      }, 800);
+      }, 1000);
     };
 
     const API_BASE = getApiBase();
     if (!API_BASE) {
-      executeDemoRegistration();
+      saveUserRecord();
       return;
     }
 
@@ -450,9 +478,9 @@ if (registerForm) {
         email: email || `${phone}@bloodreach.local`,
         password: password,
         role: selectedRole,
-        blood_group: selectedRole === 'DONOR' ? bloodGroupSelect.value : null,
-        division: selectedRole === 'DONOR' ? divisionSelect.value : null,
-        district: selectedRole === 'DONOR' ? districtSelect.value : null
+        blood_group: selectedRole === 'DONOR' ? (bloodGroupSelect ? bloodGroupSelect.value : null) : null,
+        division: selectedRole === 'DONOR' ? (divisionSelect ? divisionSelect.value : null) : null,
+        district: selectedRole === 'DONOR' ? (districtSelect ? districtSelect.value : null) : null
       };
 
       // ── API Call to FastAPI Registration Endpoint ──
@@ -483,44 +511,10 @@ if (registerForm) {
         return;
       }
 
-      // If access token returned, auto log the user in
-      if (data.access_token) {
-        localStorage.setItem('bloodreach_access_token', data.access_token);
-        localStorage.setItem('bloodreach_user_role', data.role || selectedRole);
-        localStorage.setItem('bloodreach_user_name', data.full_name || data.name || name);
-        if (selectedRole === 'DONOR' && districtSelect && districtSelect.value) {
-          localStorage.setItem('bloodreach_user_district', districtSelect.value);
-        }
-      }
-
-      const isEmergency = new URLSearchParams(window.location.search).get('emergency') === '1'
-        || new URLSearchParams(window.location.search).get('emergency') === 'true'
-        || new URLSearchParams(window.location.search).get('urgent') === '1';
-
-      if (selectedRole === 'SEEKER') {
-        showAlert('success', 'Account created successfully! Redirecting to Seeker Request Console...');
-        setTimeout(() => {
-          window.location.href = isEmergency ? 'dashboard-seeker.html?emergency=1' : 'dashboard-seeker.html';
-        }, 1200);
-      } else if (selectedRole === 'DONOR') {
-        showAlert('success', 'Donor account created successfully! Redirecting to Donor Console...');
-        setTimeout(() => {
-          window.location.href = 'dashboard-donor.html';
-        }, 1200);
-      } else if (selectedRole === 'HOSPITAL_ADMIN' || selectedRole === 'HOSPITAL') {
-        showAlert('success', 'Hospital account created successfully! Redirecting to Hospital Portal...');
-        setTimeout(() => {
-          window.location.href = 'dashboard-hospital.html';
-        }, 1200);
-      } else {
-        showAlert('success', 'Admin account created successfully! Redirecting to Admin Console...');
-        setTimeout(() => {
-          window.location.href = 'dashboard-admin.html';
-        }, 1200);
-      }
+      saveUserRecord(data.access_token, data.role || selectedRole);
 
     } catch (err) {
-      executeDemoRegistration();
+      saveUserRecord();
     }
   });
 }

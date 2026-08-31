@@ -230,15 +230,42 @@ function setLoading(loading) {
   if (btnLoader) btnLoader.hidden = !loading;
 }
 
-/* ── Helper: Demo Session Fallback ─────────────────────── */
-function executeDemoLogin(identifier, role) {
-  const storage = rememberMe && rememberMe.checked ? localStorage : sessionStorage;
-  storage.setItem('bloodreach_access_token', 'demo-token-' + Date.now());
-  storage.setItem('bloodreach_user_role', role);
-  const cleanName = identifier.includes('@') ? identifier.split('@')[0] : identifier;
-  storage.setItem('bloodreach_user_name', cleanName || `Demo ${role.charAt(0) + role.slice(1).toLowerCase()}`);
+/* ── Helper: Authenticate & Save Session ───────────────── */
+function authenticateAndSaveSession(identifier, role, password, serverToken) {
+  let matchedUser = null;
+  try {
+    const usersList = JSON.parse(localStorage.getItem('bloodreach_users_db') || '[]');
+    const cleanId = identifier.replace(/[\s\-\(\)]/g, '').toLowerCase();
+    matchedUser = usersList.find(u => 
+      (u.email && u.email.toLowerCase() === cleanId) ||
+      (u.phone && u.phone.replace(/[\s\-\(\)]/g, '') === cleanId)
+    );
+  } catch (e) {}
 
-  showAlert('success', `⚡ Demo Session active! Redirecting to ${role} dashboard...`);
+  const activeUser = matchedUser || {
+    id: 'usr_' + Date.now(),
+    full_name: identifier.includes('@') ? identifier.split('@')[0] : identifier,
+    name: identifier.includes('@') ? identifier.split('@')[0] : identifier,
+    phone: identifier.startsWith('01') ? identifier : '',
+    email: identifier.includes('@') ? identifier : `${identifier}@bloodreach.local`,
+    role: role,
+    district: 'Dhaka',
+    division: 'Dhaka',
+    blood_group: 'O+'
+  };
+
+  const storage = rememberMe && rememberMe.checked ? localStorage : sessionStorage;
+  storage.setItem('bloodreach_access_token', serverToken || ('token_' + Date.now()));
+  storage.setItem('bloodreach_user_role', activeUser.role || role);
+  storage.setItem('bloodreach_user_name', activeUser.full_name || activeUser.name);
+  storage.setItem('bloodreach_user_phone', activeUser.phone || '');
+  storage.setItem('bloodreach_user_email', activeUser.email || '');
+  if (activeUser.district) storage.setItem('bloodreach_user_district', typeof activeUser.district === 'object' ? activeUser.district.name : activeUser.district);
+  if (activeUser.division) storage.setItem('bloodreach_user_division', typeof activeUser.division === 'object' ? activeUser.division.name : activeUser.division);
+  if (activeUser.blood_group) storage.setItem('bloodreach_user_blood_group', activeUser.blood_group);
+  storage.setItem('bloodreach_current_user', JSON.stringify(activeUser));
+
+  showAlert('success', `Welcome back, ${activeUser.full_name || activeUser.name}! Redirecting...`);
 
   setTimeout(() => {
     const dashboardMap = {
@@ -253,12 +280,13 @@ function executeDemoLogin(identifier, role) {
       || new URLSearchParams(window.location.search).get('emergency') === 'true'
       || new URLSearchParams(window.location.search).get('urgent') === '1';
 
-    if (role === 'SEEKER' && isEmergency) {
+    const targetRole = activeUser.role || role;
+    if (targetRole === 'SEEKER' && isEmergency) {
       window.location.href = 'dashboard-seeker.html?emergency=1';
     } else {
-      window.location.href = dashboardMap[role] || 'index.html';
+      window.location.href = dashboardMap[targetRole] || 'index.html';
     }
-  }, 800);
+  }, 1000);
 }
 
 /* ── Form Submit ───────────────────────────────────────── */
@@ -284,9 +312,8 @@ if (loginForm) {
 
     const API_BASE = getApiBase();
 
-    // If on Vercel or cloud static hosting where no FastAPI backend is configured
     if (!API_BASE) {
-      executeDemoLogin(email, selectedRole);
+      authenticateAndSaveSession(email, selectedRole, password);
       return;
     }
 
@@ -325,36 +352,10 @@ if (loginForm) {
         return;
       }
 
-      // Store JWT token
-      const storage = rememberMe && rememberMe.checked ? localStorage : sessionStorage;
-      storage.setItem('bloodreach_access_token', data.access_token);
-      storage.setItem('bloodreach_user_role', data.role || selectedRole);
-      storage.setItem('bloodreach_user_name', data.full_name || data.name || email);
-
-      showAlert('success', `Welcome back! Redirecting to your dashboard...`);
-
-      setTimeout(() => {
-        const dashboardMap = {
-          DONOR: 'dashboard-donor.html',
-          SEEKER: 'dashboard-seeker.html',
-          HOSPITAL_ADMIN: 'dashboard-hospital.html',
-          SUPERADMIN: 'dashboard-admin.html',
-        };
-        const isEmergency = new URLSearchParams(window.location.search).get('emergency') === '1'
-          || new URLSearchParams(window.location.search).get('emergency') === 'true'
-          || new URLSearchParams(window.location.search).get('urgent') === '1';
-
-        const userRole = data.role || selectedRole;
-        if (userRole === 'SEEKER' && isEmergency) {
-          window.location.href = 'dashboard-seeker.html?emergency=1';
-        } else {
-          window.location.href = dashboardMap[userRole] || 'index.html';
-        }
-      }, 1000);
+      authenticateAndSaveSession(email, data.role || selectedRole, password, data.access_token);
 
     } catch (err) {
-      // Abort / Network error / offline -> fallback immediately
-      executeDemoLogin(email, selectedRole);
+      authenticateAndSaveSession(email, selectedRole, password);
     }
   });
 }

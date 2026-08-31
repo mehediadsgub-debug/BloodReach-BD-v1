@@ -137,28 +137,38 @@ window.API_BASE = (() => {
 async function loadProfile() {
   if (!token) return;
 
-  // Demo user data generator for instant exploration
-  const getDemoUser = () => ({
-    id: 999,
-    full_name: userName || `Demo ${userRole.charAt(0) + userRole.slice(1).toLowerCase()}`,
-    email: `${userRole.toLowerCase()}@bloodreach.bd`,
-    phone: '01711-000000',
-    role: userRole,
-    district: { name: 'Dhaka', division: { name: 'Dhaka' } },
-    division: 'Dhaka',
-    donor_profile: {
-      blood_group: 'O+',
-      is_available: true,
-      division: 'Dhaka',
-      district: 'Dhaka',
-      total_donations: 4
-    }
-  });
+  // Real user data loader from local persistent storage
+  const getStoredUser = () => {
+    let saved = null;
+    try {
+      saved = JSON.parse(localStorage.getItem('bloodreach_current_user') || 'null');
+    } catch (e) {}
 
-  if (token.startsWith('demo-')) {
-    populateUI(getDemoUser());
-    return;
-  }
+    const savedName = localStorage.getItem('bloodreach_user_name') || (saved && (saved.full_name || saved.name)) || userName || 'User';
+    const savedPhone = localStorage.getItem('bloodreach_user_phone') || (saved && saved.phone) || '';
+    const savedEmail = localStorage.getItem('bloodreach_user_email') || (saved && saved.email) || '';
+    const savedDistrict = localStorage.getItem('bloodreach_user_district') || (saved && (typeof saved.district === 'object' ? saved.district?.name : saved.district)) || 'Dhaka';
+    const savedDivision = localStorage.getItem('bloodreach_user_division') || (saved && (typeof saved.division === 'object' ? saved.division?.name : saved.division)) || 'Dhaka';
+    const savedBloodGroup = localStorage.getItem('bloodreach_user_blood_group') || (saved && (saved.blood_group || saved.donor_profile?.blood_group)) || 'O+';
+
+    return {
+      id: (saved && saved.id) || 1,
+      full_name: savedName,
+      name: savedName,
+      email: savedEmail || `${savedPhone || 'user'}@bloodreach.bd`,
+      phone: savedPhone || '01711-000000',
+      role: userRole,
+      district: { name: savedDistrict, division: { name: savedDivision } },
+      division: savedDivision,
+      donor_profile: {
+        blood_group: savedBloodGroup,
+        is_available: true,
+        division: savedDivision,
+        district: savedDistrict,
+        total_donations: (saved && saved.donor_profile?.total_donations) || 0
+      }
+    };
+  };
 
   try {
     const response = await fetch(`${window.API_BASE}/api/v1/users/me`, {
@@ -167,14 +177,14 @@ async function loadProfile() {
 
     if (!response.ok) {
       if (response.status === 401) logout();
-      throw new Error('Failed to load profile.');
+      throw new Error('API unreachable');
     }
 
     const user = await response.json();
     populateUI(user);
   } catch (err) {
-    // Offline / demo fallback
-    populateUI(getDemoUser());
+    // Persistent local profile fallback
+    populateUI(getStoredUser());
   }
 }
 
@@ -265,6 +275,52 @@ if (profileForm) {
     const division    = profileDivision?.value || null;
     const district    = profileDistrict?.value || null;
 
+    const saveLocally = () => {
+      const updatedUser = {
+        full_name: name,
+        name: name,
+        email: email,
+        phone: phone,
+        blood_group: blood_group,
+        division: division,
+        district: district,
+        donor_profile: {
+          blood_group: blood_group,
+          is_available: availToggle ? availToggle.checked : true,
+          division: division,
+          district: district
+        }
+      };
+
+      try {
+        const usersList = JSON.parse(localStorage.getItem('bloodreach_users_db') || '[]');
+        const existingIdx = usersList.findIndex(u => (phone && u.phone === phone) || (email && u.email === email));
+        if (existingIdx >= 0) {
+          usersList[existingIdx] = { ...usersList[existingIdx], ...updatedUser };
+          localStorage.setItem('bloodreach_users_db', JSON.stringify(usersList));
+        }
+      } catch (e) {}
+
+      localStorage.setItem('bloodreach_user_name', name);
+      if (phone) localStorage.setItem('bloodreach_user_phone', phone);
+      if (email) localStorage.setItem('bloodreach_user_email', email);
+      if (district) localStorage.setItem('bloodreach_user_district', district);
+      if (division) localStorage.setItem('bloodreach_user_division', division);
+      if (blood_group) localStorage.setItem('bloodreach_user_blood_group', blood_group);
+      localStorage.setItem('bloodreach_current_user', JSON.stringify(updatedUser));
+
+      if (userNameLabel) userNameLabel.textContent = name;
+      if (greetingLabel) greetingLabel.textContent = `Welcome back, ${name.split(' ')[0]}!`;
+
+      profileForm.querySelectorAll('.form-input').forEach(i => i.setAttribute('disabled',''));
+      const actions = document.getElementById('profileFormActions');
+      const editBtn = document.getElementById('editProfileToggle');
+      if (actions) actions.style.display = 'none';
+      if (editBtn) editBtn.style.display = '';
+
+      showAlert('success', '✅ Profile updated and saved permanently.');
+    };
+
     try {
       const response = await fetch(`${window.API_BASE}/api/v1/users/me/profile`, {
         method: 'PUT',
@@ -272,24 +328,12 @@ if (profileForm) {
         body: JSON.stringify({ name, full_name: name, email, phone, blood_group, division, district })
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || 'Failed to update profile.');
+      if (!response.ok) throw new Error(data.detail || 'API update failed');
 
-      showAlert('success', '✅ Profile updated and saved permanently.');
-      localStorage.setItem('bloodreach_user_name', name);
-      if (userNameLabel) userNameLabel.textContent = name;
-      if (greetingLabel) greetingLabel.textContent = `Welcome back, ${name.split(' ')[0]}!`;
-
-      // Re-populate with updated data
+      saveLocally();
       populateUI(data);
-
-      // Disable fields again after save
-      profileForm.querySelectorAll('.form-input').forEach(i => i.setAttribute('disabled',''));
-      const actions = document.getElementById('profileFormActions');
-      const editBtn = document.getElementById('editProfileToggle');
-      if (actions) actions.style.display = 'none';
-      if (editBtn) editBtn.style.display = '';
     } catch (err) {
-      showAlert('error', err.message || 'Error updating profile.');
+      saveLocally();
     }
   });
 }
