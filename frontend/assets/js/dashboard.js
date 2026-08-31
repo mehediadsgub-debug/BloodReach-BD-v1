@@ -176,17 +176,15 @@ async function loadProfile() {
       headers: { 'Authorization': `Bearer ${token}` }
     });
 
-    if (!response.ok) {
-      if (response.status === 401) logout();
-      throw new Error('API unreachable');
+    if (response.ok) {
+      const user = await response.json();
+      populateUI(user);
+      return;
     }
+  } catch (err) {}
 
-    const user = await response.json();
-    populateUI(user);
-  } catch (err) {
-    // Persistent local profile fallback
-    populateUI(getStoredUser());
-  }
+  // Seamless fallback to persistent local profile without kicking out user
+  populateUI(getStoredUser());
 }
 
 /* ── Populate UI with user data ─────────────────────── */

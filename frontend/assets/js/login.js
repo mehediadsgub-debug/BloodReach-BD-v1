@@ -297,16 +297,25 @@ async function authenticateAndSaveSession(identifier, role, password, serverToke
     localStorage.setItem('bloodreach_users_db', JSON.stringify(usersList));
   } catch (e) {}
 
-  const storage = rememberMe && rememberMe.checked ? localStorage : sessionStorage;
-  storage.setItem('bloodreach_access_token', serverToken || ('token_' + Date.now()));
-  storage.setItem('bloodreach_user_role', effectiveRole);
-  storage.setItem('bloodreach_user_name', activeUser.full_name || activeUser.name);
-  storage.setItem('bloodreach_user_phone', activeUser.phone || '');
-  storage.setItem('bloodreach_user_email', activeUser.email || '');
-  if (activeUser.district) storage.setItem('bloodreach_user_district', typeof activeUser.district === 'object' ? activeUser.district.name : activeUser.district);
-  if (activeUser.division) storage.setItem('bloodreach_user_division', typeof activeUser.division === 'object' ? activeUser.division.name : activeUser.division);
-  if (activeUser.blood_group) storage.setItem('bloodreach_user_blood_group', activeUser.blood_group);
-  storage.setItem('bloodreach_current_user', JSON.stringify(activeUser));
+  const tokenVal = serverToken || ('token_' + Date.now());
+  const distVal = activeUser.district ? (typeof activeUser.district === 'object' ? activeUser.district.name : activeUser.district) : 'Dhaka';
+  const divVal = activeUser.division ? (typeof activeUser.division === 'object' ? activeUser.division.name : activeUser.division) : 'Dhaka';
+
+  localStorage.setItem('bloodreach_access_token', tokenVal);
+  localStorage.setItem('bloodreach_user_role', effectiveRole);
+  localStorage.setItem('bloodreach_user_name', activeUser.full_name || activeUser.name || 'User');
+  localStorage.setItem('bloodreach_user_phone', activeUser.phone || '');
+  localStorage.setItem('bloodreach_user_email', activeUser.email || '');
+  localStorage.setItem('bloodreach_user_district', distVal);
+  localStorage.setItem('bloodreach_user_division', divVal);
+  if (activeUser.blood_group) localStorage.setItem('bloodreach_user_blood_group', activeUser.blood_group);
+  localStorage.setItem('bloodreach_current_user', JSON.stringify(activeUser));
+
+  sessionStorage.setItem('bloodreach_access_token', tokenVal);
+  sessionStorage.setItem('bloodreach_user_role', effectiveRole);
+  sessionStorage.setItem('bloodreach_user_name', activeUser.full_name || activeUser.name || 'User');
+  sessionStorage.setItem('bloodreach_user_phone', activeUser.phone || '');
+  sessionStorage.setItem('bloodreach_user_email', activeUser.email || '');
 
   if (window.CloudSync && typeof window.CloudSync.saveUser === 'function') {
     window.CloudSync.saveUser(activeUser);
