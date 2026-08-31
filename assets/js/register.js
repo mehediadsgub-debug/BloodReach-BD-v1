@@ -423,9 +423,9 @@ if (registerForm) {
         email: email || `${phone}@bloodreach.local`,
         password: password,
         role: selectedRole,
-        blood_group: selectedRole === 'DONOR' ? (bloodGroupSelect ? bloodGroupSelect.value : '') : null,
-        division: selectedRole === 'DONOR' ? (divisionSelect ? divisionSelect.value : '') : null,
-        district: selectedRole === 'DONOR' ? (districtSelect ? districtSelect.value : '') : null,
+        blood_group: (bloodGroupSelect && bloodGroupSelect.value) ? bloodGroupSelect.value : (selectedRole === 'DONOR' ? 'O+' : null),
+        division: (divisionSelect && divisionSelect.value) ? divisionSelect.value : 'Dhaka',
+        district: (districtSelect && districtSelect.value) ? districtSelect.value : 'Dhaka',
         created_at: new Date().toISOString()
       };
 
