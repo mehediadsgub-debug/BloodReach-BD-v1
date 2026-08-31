@@ -1,18 +1,31 @@
 {
-  "outputDirectory": "frontend",
-  "cleanUrls": true,
+  "version": 2,
+  "builds": [
+    {
+      "src": "frontend/**",
+      "use": "@vercel/static"
+    }
+  ],
   "routes": [
     {
-      "src": "/assets/(.*)",
+      "src": "^/assets/(.*)$",
       "dest": "/frontend/assets/$1"
     },
     {
-      "src": "/(.*\\.(?:html|css|js|png|jpg|jpeg|gif|svg|ico|json|woff|woff2|ttf))",
+      "src": "^/([a-zA-Z0-9_-]+\\.html)$",
       "dest": "/frontend/$1"
     },
     {
-      "src": "/(.*)",
+      "src": "^/([a-zA-Z0-9_-]+)$",
+      "dest": "/frontend/$1.html"
+    },
+    {
+      "src": "^/$",
       "dest": "/frontend/index.html"
+    },
+    {
+      "src": "^/(.*)$",
+      "dest": "/frontend/$1"
     }
   ]
 }
