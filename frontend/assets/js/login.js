@@ -7,30 +7,30 @@
 'use strict';
 
 /* ── DOM References ────────────────────────────────────── */
-const bgParticles  = document.getElementById('bgParticles');
-const floatingDrops= document.getElementById('floatingDrops');
-const roleTabs     = document.querySelectorAll('.role-tab');
-const loginForm    = document.getElementById('loginForm');
-const emailInput   = document.getElementById('email');
-const passwordInput= document.getElementById('password');
+const bgParticles = document.getElementById('bgParticles');
+const floatingDrops = document.getElementById('floatingDrops');
+const roleTabs = document.querySelectorAll('.role-tab');
+const loginForm = document.getElementById('loginForm');
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
 const togglePwdBtn = document.getElementById('togglePassword');
-const eyeIcon      = document.getElementById('eyeIcon');
-const submitBtn    = document.getElementById('submitBtn');
-const btnText      = document.getElementById('btnText');
-const btnLoader    = document.getElementById('btnLoader');
-const btnArrow     = submitBtn.querySelector('.btn-arrow');
-const alertBanner  = document.getElementById('alertBanner');
-const alertIcon    = document.getElementById('alertIcon');
-const alertMsg     = document.getElementById('alertMsg');
-const emailError   = document.getElementById('emailError');
-const passwordError= document.getElementById('passwordError');
-const groupEmail   = document.getElementById('groupEmail');
-const groupPassword= document.getElementById('groupPassword');
-const rememberMe   = document.getElementById('rememberMe');
+const eyeIcon = document.getElementById('eyeIcon');
+const submitBtn = document.getElementById('submitBtn');
+const btnText = document.getElementById('btnText');
+const btnLoader = document.getElementById('btnLoader');
+const btnArrow = submitBtn.querySelector('.btn-arrow');
+const alertBanner = document.getElementById('alertBanner');
+const alertIcon = document.getElementById('alertIcon');
+const alertMsg = document.getElementById('alertMsg');
+const emailError = document.getElementById('emailError');
+const passwordError = document.getElementById('passwordError');
+const groupEmail = document.getElementById('groupEmail');
+const groupPassword = document.getElementById('groupPassword');
+const rememberMe = document.getElementById('rememberMe');
 
 /* ── State ─────────────────────────────────────────────── */
-let selectedRole  = 'DONOR';
-let isSubmitting  = false;
+let selectedRole = 'DONOR';
+let isSubmitting = false;
 
 /* ── Animated Background ───────────────────────────────── */
 (function createBackground() {
@@ -41,11 +41,11 @@ let isSubmitting  = false;
     const size = 60 + Math.random() * 120;
     p.style.cssText = `
       width:${size}px; height:${size}px;
-      left:${Math.random()*100}%;
-      top:${Math.random()*100}%;
-      --dur:${10 + Math.random()*14}s;
-      --delay:${-Math.random()*12}s;
-      --opacity:${0.15 + Math.random()*0.3};
+      left:${Math.random() * 100}%;
+      top:${Math.random() * 100}%;
+      --dur:${10 + Math.random() * 14}s;
+      --delay:${-Math.random() * 12}s;
+      --opacity:${0.15 + Math.random() * 0.3};
     `;
     bgParticles.appendChild(p);
   }
@@ -63,27 +63,31 @@ let isSubmitting  = false;
   };
 
   const drops = [
-    [90, 5,  15, 20, 0],
+    [90, 5, 15, 20, 0],
     [50, 92, 60, 25, -5],
     [70, 12, 75, 18, -3],
     [40, 80, 10, 22, -8],
-    [110,50, 40, 30, -2],
+    [110, 50, 40, 30, -2],
     [60, 30, 85, 17, -6],
   ];
 
   drops.forEach(([sz, x, y, dur, delay]) => dropSVG(sz, x, y, dur, delay));
 })();
 
+/* ── Role Switching Helper ─────────────────────────────── */
+function setRole(role) {
+  selectedRole = role;
+  roleTabs.forEach(t => {
+    const isCurrent = t.dataset.role === role;
+    t.classList.toggle('active', isCurrent);
+    t.setAttribute('aria-pressed', isCurrent ? 'true' : 'false');
+  });
+}
+
 /* ── Role Tab Selection ────────────────────────────────── */
 roleTabs.forEach(tab => {
   tab.addEventListener('click', () => {
-    roleTabs.forEach(t => {
-      t.classList.remove('active');
-      t.setAttribute('aria-pressed', 'false');
-    });
-    tab.classList.add('active');
-    tab.setAttribute('aria-pressed', 'true');
-    selectedRole = tab.dataset.role;
+    setRole(tab.dataset.role);
 
     // Animate the tab
     tab.style.transform = 'scale(0.95)';
@@ -93,6 +97,33 @@ roleTabs.forEach(tab => {
     });
   });
 });
+
+/* ── Check URL Parameters (e.g. ?role=seeker&emergency=1) ─ */
+(function checkUrlParams() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const roleParam = (urlParams.get('role') || '').toUpperCase();
+  const isEmergency = urlParams.get('emergency') === '1' || urlParams.get('emergency') === 'true' || urlParams.get('urgent') === '1';
+
+  if (roleParam === 'SEEKER' || isEmergency) {
+    setRole('SEEKER');
+  } else if (roleParam === 'ADMIN' || roleParam === 'SUPERADMIN') {
+    setRole('SUPERADMIN');
+  } else if (roleParam === 'DONOR') {
+    setRole('DONOR');
+  }
+
+  // If emergency request mode, display emergency alert banner and update register link
+  if (isEmergency) {
+    const emergencyAlertBanner = document.getElementById('emergencyAlertBanner');
+    if (emergencyAlertBanner) {
+      emergencyAlertBanner.hidden = false;
+    }
+    const registerLink = document.getElementById('registerLink');
+    if (registerLink) {
+      registerLink.href = 'register.html?role=seeker&emergency=1';
+    }
+  }
+})();
 
 /* ── Password Visibility Toggle ────────────────────────── */
 const EYE_OPEN = `
@@ -114,7 +145,9 @@ togglePwdBtn.addEventListener('click', () => {
 /* ── Validation Helpers ────────────────────────────────── */
 function validateEmail(value) {
   if (!value.trim()) return 'Email address is required.';
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Please enter a valid email address.';
+  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  const isPhone = /^\+?[0-9]{7,15}$/.test(value);
+  if (!isEmail && !isPhone) return 'Enter a valid email address or mobile number.';
   return '';
 }
 
@@ -136,7 +169,7 @@ function setFieldError(groupEl, errorEl, inputEl, msg) {
 }
 
 function clearFieldErrors() {
-  setFieldError(groupEmail,    emailError,    emailInput,    '');
+  setFieldError(groupEmail, emailError, emailInput, '');
   setFieldError(groupPassword, passwordError, passwordInput, '');
   hideAlert();
 }
@@ -146,7 +179,7 @@ function showAlert(type, msg) {
   alertBanner.hidden = false;
   alertBanner.className = `alert-banner ${type}`;
   alertIcon.textContent = type === 'error' ? '⚠️' : '✅';
-  alertMsg.textContent  = msg;
+  alertMsg.textContent = msg;
 }
 
 function hideAlert() {
@@ -158,8 +191,8 @@ function hideAlert() {
 function setLoading(loading) {
   isSubmitting = loading;
   submitBtn.disabled = loading;
-  btnText.hidden   = loading;
-  btnArrow.hidden  = loading;
+  btnText.hidden = loading;
+  btnArrow.hidden = loading;
   btnLoader.hidden = !loading;
 }
 
@@ -170,14 +203,14 @@ loginForm.addEventListener('submit', async (e) => {
 
   clearFieldErrors();
 
-  const email    = emailInput.value.trim();
+  const email = emailInput.value.trim();
   const password = passwordInput.value;
 
   const emailErr = validateEmail(email);
-  const passErr  = validatePassword(password);
+  const passErr = validatePassword(password);
 
-  if (emailErr) setFieldError(groupEmail,    emailError,    emailInput,    emailErr);
-  if (passErr)  setFieldError(groupPassword, passwordError, passwordInput, passErr);
+  if (emailErr) setFieldError(groupEmail, emailError, emailInput, emailErr);
+  if (passErr) setFieldError(groupPassword, passwordError, passwordInput, passErr);
 
   if (emailErr || passErr) return;
 
@@ -190,8 +223,9 @@ loginForm.addEventListener('submit', async (e) => {
       role: selectedRole,
     };
 
-    // ── API Call (FastAPI backend at port 8000) ──
-    const response = await fetch('http://localhost:8000/api/v1/auth/login', {
+    // ── API Call (FastAPI backend) ──
+    const API_BASE = (window.location.port === '8000' && window.location.protocol !== 'file:') ? '' : 'http://localhost:8000';
+    const response = await fetch(`${API_BASE}/api/v1/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -200,7 +234,14 @@ loginForm.addEventListener('submit', async (e) => {
     const data = await response.json();
 
     if (!response.ok) {
-      const message = data?.detail || 'Invalid credentials. Please try again.';
+      let message = 'Invalid credentials. Please try again.';
+      if (typeof data?.detail === 'string') {
+        message = data.detail;
+      } else if (Array.isArray(data?.detail)) {
+        message = data.detail.map(d => d.msg || d.message || JSON.stringify(d)).join('; ');
+      } else if (data?.message) {
+        message = data.message;
+      }
       showAlert('error', message);
       setLoading(false);
       return;
@@ -209,30 +250,40 @@ loginForm.addEventListener('submit', async (e) => {
     // Store JWT token
     const storage = rememberMe.checked ? localStorage : sessionStorage;
     storage.setItem('bloodreach_access_token', data.access_token);
-    storage.setItem('bloodreach_user_role',   data.role || selectedRole);
-    storage.setItem('bloodreach_user_name',   data.name || '');
+    storage.setItem('bloodreach_user_role', data.role || selectedRole);
+    storage.setItem('bloodreach_user_name', data.full_name || data.name || '');
 
     showAlert('success', `Welcome back! Redirecting to your dashboard...`);
 
     // Redirect after short delay
     setTimeout(() => {
       const dashboardMap = {
-        DONOR:          'dashboard-donor.html',
-        SEEKER:         'dashboard-seeker.html',
+        DONOR: 'dashboard-donor.html',
+        SEEKER: 'dashboard-seeker.html',
         HOSPITAL_ADMIN: 'dashboard-hospital.html',
-        SUPERADMIN:     'dashboard-admin.html',
+        SUPERADMIN: 'dashboard-admin.html',
       };
-      window.location.href = dashboardMap[data.role || selectedRole] || 'index.html';
+      const isEmergency = new URLSearchParams(window.location.search).get('emergency') === '1'
+        || new URLSearchParams(window.location.search).get('emergency') === 'true'
+        || new URLSearchParams(window.location.search).get('urgent') === '1';
+
+      const userRole = data.role || selectedRole;
+      if (userRole === 'SEEKER' && isEmergency) {
+        window.location.href = 'dashboard-seeker.html?emergency=1';
+      } else {
+        window.location.href = dashboardMap[userRole] || 'index.html';
+      }
     }, 1400);
 
   } catch (err) {
-    // Network / server unreachable
-    if (err.name === 'TypeError' && err.message.includes('fetch')) {
+    // Network / server unreachable — always reset loading state
+    const isNetworkError = err instanceof TypeError;
+    if (isNetworkError) {
       showAlert('error', 'Cannot connect to server. Please ensure the backend is running on port 8000.');
     } else {
       showAlert('error', 'An unexpected error occurred. Please try again.');
     }
-    setLoading(false);
+    setLoading(false); // ✅ সবসময় loading বন্ধ হবে
   }
 });
 
@@ -279,16 +330,16 @@ rememberMe.addEventListener('change', () => {
 /* ── Already Logged In? Redirect ──────────────────────── */
 (function checkExistingSession() {
   const token = localStorage.getItem('bloodreach_access_token')
-              || sessionStorage.getItem('bloodreach_access_token');
-  const role  = localStorage.getItem('bloodreach_user_role')
-              || sessionStorage.getItem('bloodreach_user_role');
+    || sessionStorage.getItem('bloodreach_access_token');
+  const role = localStorage.getItem('bloodreach_user_role')
+    || sessionStorage.getItem('bloodreach_user_role');
 
   if (token && role) {
     const dashboardMap = {
-      DONOR:          'dashboard-donor.html',
-      SEEKER:         'dashboard-seeker.html',
+      DONOR: 'dashboard-donor.html',
+      SEEKER: 'dashboard-seeker.html',
       HOSPITAL_ADMIN: 'dashboard-hospital.html',
-      SUPERADMIN:     'dashboard-admin.html',
+      SUPERADMIN: 'dashboard-admin.html',
     };
     // Silently redirect if a valid session exists
     // window.location.href = dashboardMap[role] || 'index.html';
