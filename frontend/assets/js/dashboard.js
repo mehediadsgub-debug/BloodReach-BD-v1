@@ -124,7 +124,14 @@ function updateDistrictDropdown(divisionVal, selectedDistrictVal) {
 }
 
 /* ── API Base URL Resolution ────────────────────────── */
-window.API_BASE = (window.location.port === '8000' && window.location.protocol !== 'file:') ? '' : 'http://localhost:8000';
+window.API_BASE = (() => {
+  if (typeof window === 'undefined') return 'http://localhost:8000';
+  if (window.location.protocol === 'file:') return 'http://localhost:8000';
+  if (window.location.port === '8000') return '';
+  const protocol = window.location.protocol || 'http:';
+  const hostname = window.location.hostname || 'localhost';
+  return `${protocol}//${hostname}:8000`;
+})();
 
 /* ── Load Profile ───────────────────────────────────── */
 async function loadProfile() {

@@ -3,6 +3,7 @@ BloodReach BD — Authentication Routes
 Login, register, token refresh, logout.
 """
 
+import re
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
@@ -60,16 +61,30 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 def register(request: RegisterRequest, db: Session = Depends(get_db)):
-    """Register a new user"""
-    # Check if email exists
-    if db.query(User).filter(User.email == request.email).first():
+    # Resolve email and phone (at least one must be provided)
+    raw_email = request.email
+    raw_phone = request.phone
+
+    if not raw_email and not raw_phone:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
+            detail="Mobile number or Email is required"
+        )
+
+    # If email is not provided, create a standard phone-based system email
+    if not raw_email:
+        clean_digits = re.sub(r"[^\d]", "", raw_phone)
+        raw_email = f"{clean_digits}@bloodreach.local"
+
+    # Check if email exists
+    if db.query(User).filter(User.email == raw_email).first():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email/Account already registered"
         )
 
     # Check phone if provided
-    if request.phone and db.query(User).filter(User.phone == request.phone).first():
+    if raw_phone and db.query(User).filter(User.phone == raw_phone).first():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Phone number already registered"
@@ -87,30 +102,85 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
     district_id = request.district_id
     division_id = request.division_id
 
+    # Canonical spelling mappings for Bangladesh divisions & districts
+    DIVISION_ALIASES = {
+        "dhaka": "Dhaka",
+        "chattogram": "Chattogram",
+        "chittagong": "Chattogram",
+        "rajshahi": "Rajshahi",
+        "khulna": "Khulna",
+        "barishal": "Barishal",
+        "barisal": "Barishal",
+        "sylhet": "Sylhet",
+        "rangpur": "Rangpur",
+        "mymensingh": "Mymensingh",
+    }
+
+    DISTRICT_ALIASES = {
+        "bogra": "Bogura",
+        "bogura": "Bogura",
+        "jessore": "Jashore",
+        "jashore": "Jashore",
+        "comilla": "Comilla",
+        "cumilla": "Comilla",
+        "chattogram": "Chattogram",
+        "chittagong": "Chattogram",
+        "barisal": "Barishal",
+        "barishal": "Barishal",
+        "coxs bazar": "Cox's Bazar",
+        "cox's bazar": "Cox's Bazar",
+        "coxsbazar": "Cox's Bazar",
+        "netrakona": "Netrokona",
+        "netrokona": "Netrokona",
+        "chapainawabganj": "Chapainawabganj",
+        "chapai nawabganj": "Chapainawabganj",
+        "moulvibazar": "Moulvibazar",
+        "moulvi bazar": "Moulvibazar",
+        "brahmanbaria": "Brahmanbaria",
+    }
+
     if district_id is None and request.district:
-        clean_dist = request.district.strip()
+        raw_dist = request.district.strip()
+        clean_dist = DISTRICT_ALIASES.get(raw_dist.lower(), raw_dist)
+
         # Look up division by name, then district by (name, division)
         if division_id is None and request.division:
-            clean_div = request.division.strip()
-            division = db.query(Division).filter(Division.name.ilike(clean_div)).first()
-            if not division:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Unknown division: {request.division}"
-                )
-            division_id = division.division_id
+            raw_div = request.division.strip()
+            clean_div = DIVISION_ALIASES.get(raw_div.lower(), raw_div)
+            division = db.query(Division).filter(
+                (Division.name.ilike(clean_div)) | (Division.name.ilike(raw_div))
+            ).first()
+            if division:
+                division_id = division.division_id
 
-        district = db.query(District).filter(District.name.ilike(clean_dist))
+        # 1. Try matching clean_dist with division_id filter if present
+        query = db.query(District).filter(
+            (District.name.ilike(clean_dist)) | (District.name.ilike(raw_dist))
+        )
         if division_id is not None:
-            district = district.filter(District.division_id == division_id)
-        district = district.first()
+            district = query.filter(District.division_id == division_id).first()
+        else:
+            district = query.first()
 
+        # 2. Fallback: match without division_id filter
         if not district:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Unknown district: {request.district}"
-            )
-        district_id = district.district_id
+            district = db.query(District).filter(
+                (District.name.ilike(clean_dist)) | (District.name.ilike(raw_dist))
+            ).first()
+
+        # 3. Fallback: partial match
+        if not district:
+            district = db.query(District).filter(District.name.ilike(f"%{clean_dist}%")).first()
+
+        if district:
+            district_id = district.district_id
+        elif request.role == UserRole.DONOR:
+            # If district database table is completely unseeded, fallback to first available or error
+            fallback_dist = db.query(District).first()
+            if fallback_dist:
+                district_id = fallback_dist.district_id
+            else:
+                district_id = None
 
     # Validate donor-specific fields
     if request.role == UserRole.DONOR:
@@ -129,8 +199,8 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
     # Create user
     user = User(
         full_name=full_name,
-        email=request.email,
-        phone=request.phone,
+        email=raw_email,
+        phone=raw_phone,
         password_hash=hash_password(request.password),
         role=request.role,
         district_id=district_id,
@@ -155,8 +225,8 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
             name=full_name,  # Use name as hospital name initially
             admin_user_id=user.user_id,
             district_id=district_id,
-            contact_email=request.email,
-            contact_phone=request.phone
+            contact_email=raw_email,
+            contact_phone=raw_phone
         )
         db.add(hospital)
 

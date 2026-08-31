@@ -143,3 +143,61 @@ def test_token_refresh(client):
     )
     assert refresh_res.status_code == 200
     assert "access_token" in refresh_res.json()
+
+
+def test_register_donor_with_district_name_and_formatted_phone(client):
+    response = client.post(
+        "/api/v1/auth/register",
+        json={
+            "name": "District Name Donor",
+            "email": "districtdonor@example.com",
+            "phone": "01711-998877",
+            "password": "Password123!",
+            "role": "DONOR",
+            "blood_group": "O+",
+            "district": "Dhaka",
+            "division": "Dhaka"
+        }
+    )
+    assert response.status_code == 201
+    data = response.json()
+    assert "access_token" in data
+    assert data["role"] == "DONOR"
+    assert data["full_name"] == "District Name Donor"
+
+
+def test_register_hospital_admin(client):
+    response = client.post(
+        "/api/v1/auth/register",
+        json={
+            "name": "City General Hospital",
+            "email": "cityhospital@example.com",
+            "phone": "+880 1711 556677",
+            "password": "Password123!",
+            "role": "HOSPITAL",
+            "district": "Dhaka"
+        }
+    )
+    assert response.status_code == 201
+    data = response.json()
+    assert data["role"] == "HOSPITAL_ADMIN"
+    assert "access_token" in data
+
+
+def test_register_with_phone_only(client):
+    response = client.post(
+        "/api/v1/auth/register",
+        json={
+            "name": "Phone Only User",
+            "phone": "01811-334455",
+            "password": "Password123!",
+            "role": "SEEKER"
+        }
+    )
+    assert response.status_code == 201
+    data = response.json()
+    assert "access_token" in data
+    assert data["role"] == "SEEKER"
+    assert data["full_name"] == "Phone Only User"
+
+

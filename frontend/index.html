@@ -1487,7 +1487,8 @@
         </div>
 
         <!-- Mobile Hamburger Button -->
-        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Open navigation menu" style="display:none;">
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Open navigation menu"
+            style="display:none;">
             <span></span>
             <span></span>
             <span></span>
@@ -1817,7 +1818,14 @@
     <!-- Interactive JavaScript Logic -->
     <script>
         // Global API endpoint
-        const API_BASE = (window.location.port === '8000' && window.location.protocol !== 'file:') ? '' : 'http://localhost:8000';
+        const API_BASE = (() => {
+            if (typeof window === 'undefined') return 'http://localhost:8000';
+            if (window.location.protocol === 'file:') return 'http://localhost:8000';
+            if (window.location.port === '8000') return '';
+            const protocol = window.location.protocol || 'http:';
+            const hostname = window.location.hostname || 'localhost';
+            return `${protocol}//${hostname}:8000`;
+        })();
 
         // ────────────────────────────────────────────────────────
         // 1. Check Authentication Status
@@ -2137,7 +2145,7 @@
                 try {
                     localCustomDonors = JSON.parse(localStorage.getItem('bloodreach_custom_donors') || '[]');
                     localCustomSeekers = JSON.parse(localStorage.getItem('bloodreach_custom_seekers') || '[]');
-                } catch(e){}
+                } catch (e) { }
 
                 _donorsData = backendDonors && Array.isArray(backendDonors) ? [...backendDonors, ...localCustomDonors] : [...localCustomDonors];
                 _seekersData = backendSeekers && Array.isArray(backendSeekers) ? [...backendSeekers, ...localCustomSeekers] : [...localCustomSeekers];

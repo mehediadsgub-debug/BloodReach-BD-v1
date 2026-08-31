@@ -39,10 +39,12 @@ class LoginRequest(BaseModel):
         return v
 
 
+import re
+
 class RegisterRequest(BaseModel):
     full_name: Optional[str] = Field(None, min_length=2, max_length=150)
     name: Optional[str] = Field(None, min_length=2, max_length=150)
-    email: EmailStr
+    email: Optional[EmailStr] = None
     phone: Optional[str] = Field(None, pattern=r"^\+?[0-9]{7,15}$")
     password: str = Field(..., min_length=6, max_length=100)
     role: UserRole
@@ -52,6 +54,13 @@ class RegisterRequest(BaseModel):
     # Frontend sends location by NAME (not id) — resolved to ids in the route
     division: Optional[str] = None
     district: Optional[str] = None
+
+    @field_validator("email", mode="before")
+    @classmethod
+    def normalize_email(cls, v):
+        if not v or (isinstance(v, str) and not v.strip()):
+            return None
+        return v.strip().lower() if isinstance(v, str) else v
 
     @field_validator("role", mode="before")
     @classmethod
@@ -66,6 +75,26 @@ class RegisterRequest(BaseModel):
                 return UserRole.DONOR
             if v_upper == "SEEKER":
                 return UserRole.SEEKER
+        return v
+
+    @field_validator("phone", mode="before")
+    @classmethod
+    def normalize_phone(cls, v):
+        if not v or (isinstance(v, str) and not v.strip()):
+            return None
+        if isinstance(v, str):
+            cleaned = re.sub(r"[\s\-\(\)]", "", v.strip())
+            return cleaned if cleaned else None
+        return v
+
+    @field_validator("blood_group", mode="before")
+    @classmethod
+    def normalize_blood_group(cls, v):
+        if not v or (isinstance(v, str) and not v.strip()):
+            return None
+        if isinstance(v, str):
+            cleaned = v.replace(" ", "+").strip().upper()
+            return cleaned if cleaned else None
         return v
 
 

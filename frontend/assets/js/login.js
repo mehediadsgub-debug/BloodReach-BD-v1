@@ -224,7 +224,15 @@ loginForm.addEventListener('submit', async (e) => {
     };
 
     // ── API Call (FastAPI backend) ──
-    const API_BASE = (window.location.port === '8000' && window.location.protocol !== 'file:') ? '' : 'http://localhost:8000';
+    const getApiBase = () => {
+      if (typeof window === 'undefined') return 'http://localhost:8000';
+      if (window.location.protocol === 'file:') return 'http://localhost:8000';
+      if (window.location.port === '8000') return '';
+      const protocol = window.location.protocol || 'http:';
+      const hostname = window.location.hostname || 'localhost';
+      return `${protocol}//${hostname}:8000`;
+    };
+    const API_BASE = getApiBase();
     const response = await fetch(`${API_BASE}/api/v1/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

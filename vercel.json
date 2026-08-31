@@ -43,6 +43,10 @@
     {
       "source": "/dashboard-admin",
       "destination": "/dashboard-admin.html"
+    },
+    {
+      "source": "/dashboard-hospital",
+      "destination": "/dashboard-hospital.html"
     }
   ]
 }

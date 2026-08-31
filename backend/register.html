@@ -190,6 +190,10 @@
               <span class="role-icon">🔍</span>
               <span>Seeker</span>
             </button>
+            <button type="button" class="role-tab" id="roleTabHospital" data-role="HOSPITAL_ADMIN" aria-pressed="false" aria-label="Register as Hospital">
+              <span class="role-icon">🏥</span>
+              <span>Hospital</span>
+            </button>
             <button type="button" class="role-tab" id="roleTabAdmin" data-role="SUPERADMIN" aria-pressed="false" aria-label="Register as Superadmin">
               <span class="role-icon">🛡️</span>
               <span>Admin</span>
@@ -234,10 +238,10 @@
 
           <!-- Email Field -->
           <div class="form-group" id="groupEmail">
-            <label for="email" class="form-label">Email Address *</label>
+            <label for="email" class="form-label">Email Address (Optional)</label>
             <div class="input-wrapper">
               <span class="input-icon" aria-hidden="true">✉️</span>
-              <input type="email" id="email" name="email" class="form-input" placeholder="your@email.com" autocomplete="email" required aria-required="true" aria-describedby="emailError" />
+              <input type="email" id="email" name="email" class="form-input" placeholder="your@email.com (optional)" autocomplete="email" aria-describedby="emailError" />
             </div>
             <span class="field-error" id="emailError" role="alert" aria-live="polite"></span>
           </div>
