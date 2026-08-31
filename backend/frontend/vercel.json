@@ -22,10 +22,6 @@
       "destination": "/dashboard-seeker.html"
     },
     {
-      "source": "/dashboard-hospital",
-      "destination": "/dashboard-hospital.html"
-    },
-    {
       "source": "/dashboard-admin",
       "destination": "/dashboard-admin.html"
     }
