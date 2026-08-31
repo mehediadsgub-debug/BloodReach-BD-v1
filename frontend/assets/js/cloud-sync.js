@@ -217,8 +217,8 @@
 
       const donorMap = new Map();
 
-      // 1. Add authentic registered donors from local/session storage
-      localUsers.filter(u => u.role === 'DONOR').forEach((u, i) => {
+      // 1. Add authentic registered donors from local/session storage (Must be ACTIVE and not rejected)
+      localUsers.filter(u => u.role === 'DONOR' && u.is_active !== false && u.verification_status !== 'REJECTED').forEach((u, i) => {
         const phoneClean = (u.phone || '').replace(/[^0-9]/g, '');
         const emailClean = (u.email || '').toLowerCase().trim();
         const key = phoneClean || emailClean || u.id || u.user_id;
@@ -241,9 +241,9 @@
         });
       });
 
-      // 2. Merge backend database donors
+      // 2. Merge backend database donors (Must be ACTIVE)
       if (Array.isArray(backendDonors)) {
-        backendDonors.forEach(d => {
+        backendDonors.filter(d => d.is_active !== false).forEach(d => {
           const phoneClean = (d.phone || '').replace(/[^0-9]/g, '');
           const key = phoneClean || d.donor_id || d.id;
           const distName = typeof d.district === 'object' ? (d.district?.name || 'Dhaka') : (d.district || 'Dhaka');
@@ -270,7 +270,7 @@
       return Array.from(donorMap.values());
     },
 
-    // Public getter for all Emergency Blood Requests across Bangladesh (authentic registered requests only)
+    // Public getter for all Emergency Blood Requests across Bangladesh (ONLY ADMIN-APPROVED REQUESTS)
     async getPublicRequests() {
       const apiBase = getApiBase();
       let backendReqs = [];
@@ -290,8 +290,8 @@
 
       const reqMap = new Map();
 
-      // 1. Add authentic locally submitted requests
-      localReqs.forEach((r, i) => {
+      // 1. Add authentic locally submitted requests ONLY IF APPROVED BY ADMIN
+      localReqs.filter(r => r.verification_status === 'APPROVED' && (r.status === 'OPEN' || r.status === 'IN_PROGRESS')).forEach((r, i) => {
         const key = r.id || r.request_id || `${r.phone || r.contact_phone}_${r.blood_group}_${r.district}`;
         const distName = typeof r.district === 'object' ? (r.district?.name || 'Dhaka') : (r.district || 'Dhaka');
         const divName = typeof r.division === 'object' ? (r.division?.name || 'Dhaka') : (r.division || 'Dhaka');
@@ -311,7 +311,7 @@
           phone: r.phone || r.contact_phone || '',
           contact_phone: r.phone || r.contact_phone || '',
           status: r.status || 'OPEN',
-          verification_status: r.verification_status || 'PENDING_VERIFICATION',
+          verification_status: 'APPROVED',
           admin_notes: r.admin_notes || '',
           created_at: r.created_at || new Date().toISOString()
         });

@@ -936,8 +936,8 @@
         phone: contactPhone,
         contact_phone: contactPhone,
         patient_condition: note || `Patient ${patientName} at ${hospitalName} (${hospitalCabin})`,
-        verification_status: 'APPROVED',
-        status: 'OPEN',
+        verification_status: 'PENDING_VERIFICATION',
+        status: 'PENDING',
         created_at: new Date().toISOString()
       };
 
@@ -979,7 +979,7 @@
         });
       } catch (err) {}
 
-      showGlobalAlert('success', '🛡️ Blood request submitted! Real donors in ' + district + ' and nearby hospitals can now view your request.');
+      showGlobalAlert('warning', '⏳ Blood request submitted! Your request is currently under Admin Verification. Once approved by Admin, it will immediately go live on the map and notify donors.');
       requestModal.classList.remove('open');
       requestForm.reset();
       currentNidBase64 = null;

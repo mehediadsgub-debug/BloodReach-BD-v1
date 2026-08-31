@@ -445,6 +445,11 @@ if (registerForm) {
         window.CloudSync.saveUser(userRecord);
       }
 
+      userRecord.is_active = true;
+      if (selectedRole === 'DONOR') {
+        userRecord.verification_status = 'APPROVED';
+      }
+
       localStorage.setItem('bloodreach_access_token', token || ('token_' + Date.now()));
       localStorage.setItem('bloodreach_user_role', role || selectedRole);
       localStorage.setItem('bloodreach_user_name', name);
@@ -455,18 +460,17 @@ if (registerForm) {
       if (userRecord.blood_group) localStorage.setItem('bloodreach_user_blood_group', userRecord.blood_group);
       localStorage.setItem('bloodreach_current_user', JSON.stringify(userRecord));
 
-      showAlert('success', 'Account registered successfully! Redirecting...');
-      setTimeout(() => {
-        const dashboardMap = {
-          DONOR: 'dashboard-donor.html',
-          SEEKER: (new URLSearchParams(window.location.search).get('emergency') === '1') ? 'dashboard-seeker.html?emergency=1' : 'dashboard-seeker.html',
-          HOSPITAL_ADMIN: 'dashboard-hospital.html',
-          HOSPITAL: 'dashboard-hospital.html',
-          SUPERADMIN: 'dashboard-admin.html',
-          ADMIN: 'dashboard-admin.html',
-        };
-        window.location.href = dashboardMap[selectedRole] || 'index.html';
-      }, 1000);
+      if (selectedRole === 'SEEKER') {
+        showAlert('success', 'Registration successful! Redirecting to Sign In page...');
+        setTimeout(() => {
+          window.location.href = `login.html?role=SEEKER&registered=1&email=${encodeURIComponent(userRecord.email)}`;
+        }, 900);
+      } else {
+        showAlert('success', 'Account registered successfully! Redirecting to Donor Dashboard...');
+        setTimeout(() => {
+          window.location.href = 'dashboard-donor.html';
+        }, 900);
+      }
     };
 
     const API_BASE = getApiBase();

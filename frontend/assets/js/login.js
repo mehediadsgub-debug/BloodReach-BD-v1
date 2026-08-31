@@ -137,11 +137,13 @@ roleTabs.forEach(tab => {
   });
 });
 
-/* ── Check URL Parameters (e.g. ?role=seeker&emergency=1) ─ */
+/* ── Check URL Parameters (e.g. ?role=seeker&emergency=1&registered=1) ─ */
 (function checkUrlParams() {
   const urlParams = new URLSearchParams(window.location.search);
   const roleParam = (urlParams.get('role') || '').toUpperCase();
   const isEmergency = urlParams.get('emergency') === '1' || urlParams.get('emergency') === 'true' || urlParams.get('urgent') === '1';
+  const isRegistered = urlParams.get('registered') === '1';
+  const emailParam = urlParams.get('email');
 
   if (roleParam === 'SEEKER' || isEmergency) {
     setRole('SEEKER');
@@ -151,6 +153,14 @@ roleTabs.forEach(tab => {
     setRole('SUPERADMIN');
   } else if (roleParam === 'DONOR') {
     setRole('DONOR');
+  }
+
+  if (emailParam && emailInput) {
+    emailInput.value = emailParam;
+  }
+
+  if (isRegistered) {
+    showAlert('success', '✅ Registration completed successfully! Please sign in with your password to access your dashboard.');
   }
 
   if (isEmergency) {

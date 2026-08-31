@@ -757,10 +757,17 @@
         const idx = reqs.findIndex(r => (r.id === requestId || r.request_id === requestId));
         if (idx >= 0) {
           reqs[idx].verification_status = action === 'APPROVE' ? 'APPROVED' : (action === 'FLAG_FRAUD' ? 'FLAGGED_FRAUD' : 'REJECTED');
+          reqs[idx].status = action === 'APPROVE' ? 'OPEN' : 'REJECTED';
           reqs[idx].admin_notes = notes || '';
           localStorage.setItem('bloodreach_requests_db', JSON.stringify(reqs));
           if (window.CloudSync && typeof window.CloudSync.saveRequest === 'function') {
             window.CloudSync.saveRequest(reqs[idx]);
+          }
+          if (action === 'APPROVE' && window.CloudSync && typeof window.CloudSync.notifyListeners === 'function') {
+            window.CloudSync.notifyListeners({
+              type: 'REQUEST_APPROVED',
+              request: reqs[idx]
+            });
           }
         }
       } catch (e) {}
