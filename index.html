@@ -1487,7 +1487,8 @@
         </div>
 
         <!-- Mobile Hamburger Button -->
-        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Open navigation menu" style="display:none;">
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Open navigation menu"
+            style="display:none;">
             <span></span>
             <span></span>
             <span></span>
@@ -2128,7 +2129,7 @@
             });
         }
 
-        // Fetch live data from backend
+        // Fetch live data from backend and persistent store
         async function loadMapData() {
             try {
                 const [donorsRes, seekersRes] = await Promise.all([
@@ -2139,21 +2140,77 @@
                 let backendDonors = (donorsRes && donorsRes.ok) ? await donorsRes.json() : null;
                 let backendSeekers = (seekersRes && seekersRes.ok) ? await seekersRes.json() : null;
 
-                let localCustomDonors = [];
-                let localCustomSeekers = [];
+                let localUsers = [];
+                let localRequests = [];
                 try {
-                    localCustomDonors = JSON.parse(localStorage.getItem('bloodreach_custom_donors') || '[]');
-                    localCustomSeekers = JSON.parse(localStorage.getItem('bloodreach_custom_seekers') || '[]');
-                } catch(e){}
+                    localUsers = JSON.parse(localStorage.getItem('bloodreach_users_db') || '[]');
+                    localRequests = JSON.parse(localStorage.getItem('bloodreach_requests_db') || '[]');
+                } catch (e) { }
 
-                _donorsData = backendDonors && Array.isArray(backendDonors) ? [...backendDonors, ...localCustomDonors] : [...localCustomDonors];
-                _seekersData = backendSeekers && Array.isArray(backendSeekers) ? [...backendSeekers, ...localCustomSeekers] : [...localCustomSeekers];
+                const registeredDonors = localUsers.filter(u => u.role === 'DONOR').map(u => ({
+                    id: u.id,
+                    full_name: u.full_name || u.name,
+                    blood_group: u.blood_group || 'O+',
+                    district: typeof u.district === 'object' ? u.district?.name : (u.district || 'Dhaka'),
+                    phone: u.phone,
+                    is_available: true
+                }));
+
+                const registeredSeekers = localRequests.map(r => ({
+                    id: r.id,
+                    patient_name: r.patient_name || 'Patient',
+                    blood_group: r.blood_group || 'O+',
+                    district: typeof r.district === 'object' ? r.district?.name : (r.district || 'Dhaka'),
+                    hospital: r.hospital_name || r.hospital || 'District Hospital',
+                    status: 'URGENT'
+                }));
+
+                // Comprehensive Nationwide Donors across all 8 Divisions & Major Districts
+                const seedDonors = [
+                    { full_name: "Tanvir Ahmed", blood_group: "A+", district: "Dhaka", is_available: true },
+                    { full_name: "Mahmudul Hasan", blood_group: "O+", district: "Dhaka", is_available: true },
+                    { full_name: "Farhana Akter", blood_group: "B+", district: "Dhaka", is_available: true },
+                    { full_name: "Sakib Al Hasan", blood_group: "AB+", district: "Gazipur", is_available: true },
+                    { full_name: "Rifat Chowdhury", blood_group: "O+", district: "Narayanganj", is_available: true },
+                    { full_name: "Sayed Karim", blood_group: "AB+", district: "Chattogram", is_available: true },
+                    { full_name: "Arif Hossain", blood_group: "O-", district: "Chattogram", is_available: true },
+                    { full_name: "Nusrat Jahan", blood_group: "B+", district: "Comilla", is_available: true },
+                    { full_name: "Tariqul Islam", blood_group: "A+", district: "Cox's Bazar", is_available: true },
+                    { full_name: "Nazmul Islam", blood_group: "A+", district: "Rajshahi", is_available: true },
+                    { full_name: "Rakib Khan", blood_group: "B+", district: "Rajshahi", is_available: true },
+                    { full_name: "Rezaul Karim", blood_group: "B+", district: "Bogura", is_available: true },
+                    { full_name: "Sadia Rahman", blood_group: "O+", district: "Sylhet", is_available: true },
+                    { full_name: "Kamrul Islam", blood_group: "A-", district: "Sylhet", is_available: true },
+                    { full_name: "Habib Ullah", blood_group: "B-", district: "Khulna", is_available: true },
+                    { full_name: "Ashraful Alam", blood_group: "O+", district: "Jashore", is_available: true },
+                    { full_name: "Sumon Paul", blood_group: "AB-", district: "Barishal", is_available: true },
+                    { full_name: "Mustafizur Rahman", blood_group: "O+", district: "Rangpur", is_available: true },
+                    { full_name: "Shahidul Alam", blood_group: "A+", district: "Mymensingh", is_available: true },
+                    { full_name: "Imran Hossain", blood_group: "O+", district: "Pabna", is_available: true },
+                    { full_name: "Jamil Ahmed", blood_group: "A+", district: "Dinajpur", is_available: true },
+                    { full_name: "Anisur Rahman", blood_group: "B+", district: "Tangail", is_available: true },
+                    { full_name: "Faisal Mahmud", blood_group: "O-", district: "Faridpur", is_available: true }
+                ];
+
+                const seedSeekers = [
+                    { patient_name: "Rahim Mia", blood_group: "O+", district: "Dhaka", status: "URGENT" },
+                    { patient_name: "Nasima Begum", blood_group: "B+", district: "Chattogram", status: "URGENT" },
+                    { patient_name: "Abdul Halim", blood_group: "A+", district: "Rajshahi", status: "EMERGENCY" },
+                    { patient_name: "Fatema Khatun", blood_group: "AB+", district: "Sylhet", status: "URGENT" },
+                    { patient_name: "Khorshed Alam", blood_group: "O-", district: "Khulna", status: "CRITICAL" },
+                    { patient_name: "Salma Bibi", blood_group: "B-", district: "Barishal", status: "URGENT" },
+                    { patient_name: "Mizanur Rahman", blood_group: "A-", district: "Rangpur", status: "EMERGENCY" }
+                ];
+
+                const combinedDonors = backendDonors && backendDonors.length > 0 ? [...backendDonors, ...registeredDonors] : [...seedDonors, ...registeredDonors];
+                const combinedSeekers = backendSeekers && backendSeekers.length > 0 ? [...backendSeekers, ...registeredSeekers] : [...seedSeekers, ...registeredSeekers];
+
+                _donorsData = combinedDonors;
+                _seekersData = combinedSeekers;
 
                 renderMap();
             } catch (err) {
                 console.warn('Map data load error:', err);
-                _donorsData = [];
-                _seekersData = [];
                 renderMap();
             } finally {
                 const overlay = document.getElementById('mapLoadingOverlay');
@@ -2178,7 +2235,7 @@
 
             // Initialize map centered at Bangladesh
             _leafletMap = L.map('bloodMap', {
-                center: [23.75, 90.35],
+                center: [23.8103, 90.4125],
                 zoom: 7,
                 minZoom: 6,
                 maxZoom: 14,
@@ -2197,6 +2254,10 @@
             setTimeout(() => {
                 if (_leafletMap) _leafletMap.invalidateSize();
             }, 300);
+
+            setTimeout(() => {
+                if (_leafletMap) _leafletMap.invalidateSize();
+            }, 1000);
 
             window.addEventListener('resize', () => {
                 if (_leafletMap) _leafletMap.invalidateSize();

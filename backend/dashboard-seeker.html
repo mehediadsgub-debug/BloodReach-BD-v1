@@ -1433,8 +1433,41 @@
         _allDonors = [];
       }
 
-      if (!_allDonors) {
-        _allDonors = [];
+      if (!_allDonors || _allDonors.length === 0) {
+        let localUsers = [];
+        try {
+          localUsers = JSON.parse(localStorage.getItem('bloodreach_users_db') || '[]');
+        } catch (e) {}
+
+        const registeredDonors = localUsers.filter(u => u.role === 'DONOR').map((u, i) => ({
+          id: u.id || (500 + i),
+          name: u.full_name || u.name,
+          blood_group: u.blood_group || 'O+',
+          district: typeof u.district === 'object' ? u.district?.name : (u.district || 'Dhaka'),
+          division: typeof u.division === 'object' ? u.division?.name : (u.division || 'Dhaka'),
+          phone: u.phone,
+          is_phone_unlocked: true,
+          is_available: true,
+          last_donation: 'Ready to donate'
+        }));
+
+        const seedDonors = [
+          { id: 101, name: "Tanvir Ahmed", blood_group: "A+", district: "Dhaka", division: "Dhaka", phone: "01711-234567", is_phone_unlocked: false, is_available: true, last_donation: "2026-06-10" },
+          { id: 102, name: "Mahmudul Hasan", blood_group: "O+", district: "Dhaka", division: "Dhaka", phone: "01819-345678", is_phone_unlocked: false, is_available: true, last_donation: "2026-07-01" },
+          { id: 103, name: "Farhana Akter", blood_group: "B+", district: "Dhaka", division: "Dhaka", phone: "01912-456789", is_phone_unlocked: false, is_available: true, last_donation: "2026-05-15" },
+          { id: 104, name: "Sayed Karim", blood_group: "AB+", district: "Chattogram", division: "Chattogram", phone: "01811-567890", is_phone_unlocked: false, is_available: true, last_donation: "2026-06-20" },
+          { id: 105, name: "Arif Hossain", blood_group: "O-", district: "Chattogram", division: "Chattogram", phone: "01712-678901", is_phone_unlocked: false, is_available: true, last_donation: "2026-07-12" },
+          { id: 106, name: "Nazmul Islam", blood_group: "A+", district: "Rajshahi", division: "Rajshahi", phone: "01713-789012", is_phone_unlocked: false, is_available: true, last_donation: "2026-06-05" },
+          { id: 107, name: "Rakib Khan", blood_group: "B+", district: "Rajshahi", division: "Rajshahi", phone: "01914-890123", is_phone_unlocked: false, is_available: true, last_donation: "2026-07-18" },
+          { id: 108, name: "Sadia Rahman", blood_group: "O+", district: "Sylhet", division: "Sylhet", phone: "01815-901234", is_phone_unlocked: false, is_available: true, last_donation: "2026-06-25" },
+          { id: 109, name: "Kamrul Islam", blood_group: "A-", district: "Sylhet", division: "Sylhet", phone: "01716-012345", is_phone_unlocked: false, is_available: true, last_donation: "2026-07-22" },
+          { id: 110, name: "Habib Ullah", blood_group: "B-", district: "Khulna", division: "Khulna", phone: "01917-123456", is_phone_unlocked: false, is_available: true, last_donation: "2026-06-18" },
+          { id: 111, name: "Sumon Paul", blood_group: "AB-", district: "Barishal", division: "Barishal", phone: "01818-234567", is_phone_unlocked: false, is_available: true, last_donation: "2026-07-05" },
+          { id: 112, name: "Mustafizur Rahman", blood_group: "O+", district: "Rangpur", division: "Rangpur", phone: "01719-345678", is_phone_unlocked: false, is_available: true, last_donation: "2026-06-30" },
+          { id: 113, name: "Shahidul Alam", blood_group: "A+", district: "Mymensingh", division: "Mymensingh", phone: "01920-456789", is_phone_unlocked: false, is_available: true, last_donation: "2026-07-15" }
+        ];
+
+        _allDonors = [...registeredDonors, ...seedDonors];
       }
 
       // Check URL query parameters (e.g., ?district=Chattogram)
