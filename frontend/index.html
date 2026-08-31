@@ -2307,21 +2307,48 @@
                 const groupsArray = Array.from(data.bloodGroups);
                 const groupTags = groupsArray.length > 0
                     ? groupsArray.map(g => `<span class="group-tag">${g}</span>`).join('')
-                    : '<span class="group-tag">Available</span>';
+                // Helper to mask donor names and phone numbers for public privacy protection
+                const maskDonorName = (name) => {
+                    if (!name) return 'Verified Donor';
+                    const parts = name.trim().split(' ');
+                    if (parts.length === 1) {
+                        return parts[0].length > 3 ? parts[0].substring(0, 3) + '***' : parts[0];
+                    }
+                    return parts[0] + ' ' + (parts[1] ? parts[1][0] + '***' : '');
+                };
 
-                // Donor sample list
-                const donorListHtml = data.donorItems.slice(0, 3).map(d => `
-                    <div class="popup-list-item">
-                        <span>🩸 ${d.full_name || 'Registered Donor'}</span>
-                        <span class="badge-pill" style="background:rgba(239,68,68,0.25); color:#FCA5A5;">${d.blood_group || 'O+'}</span>
+                const maskPhone = (phone) => {
+                    if (!phone) return '🔒 Hidden (Privacy Protected)';
+                    const clean = phone.replace(/[^0-9]/g, '');
+                    if (clean.length >= 8) {
+                        return clean.substring(0, 3) + '****' + clean.slice(-3);
+                    }
+                    return '🔒 Hidden (Privacy Protected)';
+                };
+
+                // Donor sample list with privacy protection
+                const donorListHtml = data.donorItems.slice(0, 4).map(d => `
+                    <div class="popup-list-item" style="display:flex; justify-content:space-between; align-items:center; padding:5px 8px; margin-bottom:4px; background:rgba(255,255,255,0.04); border-radius:6px;">
+                        <div>
+                            <div style="font-weight:600; color:#F8FAFC; font-size:0.82rem;">🩸 ${maskDonorName(d.full_name || d.name)}</div>
+                            <div style="font-size:0.68rem; color:#94A3B8; margin-top:2px;">
+                                🔒 Phone: <span style="color:#CBD5E1;">${maskPhone(d.phone)}</span>
+                            </div>
+                        </div>
+                        <span class="badge-pill" style="background:rgba(239,68,68,0.22); color:#FCA5A5; font-weight:700; font-size:0.75rem; padding:2px 7px; border-radius:10px;">${d.blood_group || 'O+'}</span>
                     </div>
                 `).join('');
 
                 // Seeker sample list
                 const seekerListHtml = data.seekerItems.slice(0, 3).map(s => `
-                    <div class="popup-list-item">
-                        <span>🚨 ${s.patient_name || 'Patient'} (${s.hospital_name || 'Hospital'})</span>
-                        <span class="badge-pill" style="background:rgba(245,158,11,0.25); color:#FCD34D;">${s.blood_group || 'O+'}</span>
+                    <div class="popup-list-item" style="display:flex; justify-content:space-between; align-items:center; padding:5px 8px; margin-bottom:4px; background:rgba(245,158,11,0.06); border-radius:6px;">
+                        <div>
+                            <div style="font-weight:600; color:#FCD34D; font-size:0.82rem;">🚨 ${s.patient_name || 'Emergency Patient'}</div>
+                            <div style="font-size:0.68rem; color:#94A3B8; margin-top:2px;">
+                                🏥 ${s.hospital_name || 'Hospital'} &bull; ${s.units_needed || 1} Unit(s)
+                            </div>
+                        </div>
+                        <span class="badge-pill" style="background:rgba(245,158,11,0.25); color:#FCD34D; font-weight:700; font-size:0.75rem; padding:2px 7px; border-radius:10px;">${s.blood_group || 'O+'}</span>
                     </div>
                 `).join('');
 
@@ -2330,10 +2357,10 @@
                     popupHtml = `
                         <div class="popup-content">
                             <div class="popup-title">📍 ${district} District</div>
-                            ${hasDonors ? `<div class="popup-info-row alert">🩸 ${data.donors} Donor${data.donors > 1 ? 's' : ''} Ready to Donate</div>` : '<div class="popup-info-row">No donors currently registered</div>'}
+                            ${hasDonors ? `<div class="popup-info-row alert">🩸 ${data.donors} Verified Donor${data.donors > 1 ? 's' : ''} Active</div>` : '<div class="popup-info-row">No donors currently registered</div>'}
                             ${hasSeekers ? `<div class="popup-info-row" style="color:#FBBF24;">⚠️ ${data.seekers} Emergency Request${data.seekers > 1 ? 's' : ''}</div>` : ''}
                             <div class="popup-badge-list">
-                                <div>Blood Groups Available:</div>
+                                <div>Blood Groups:</div>
                                 <div style="margin-top:4px;">${groupTags}</div>
                             </div>
                             <div style="margin-bottom:0.6rem;">${donorListHtml}${seekerListHtml}</div>
@@ -2347,21 +2374,21 @@
                         <div class="popup-content">
                             <div class="popup-title">📍 ${district} District</div>
                             <div class="popup-info-row">
-                                🩸 Status: <strong>${data.donors} Registered Donors &bull; ${data.seekers} Emergency Requests</strong>
+                                🩸 <strong>${data.donors} Active Donors &bull; ${data.seekers} Requests</strong>
                             </div>
                             <div class="popup-badge-list">
-                                <div>Blood Groups Available:</div>
+                                <div>Available Groups:</div>
                                 <div style="margin-top:4px;">${groupTags}</div>
                             </div>
                             <div style="margin-bottom:0.6rem;">
                                 ${donorListHtml}
                                 ${seekerListHtml}
                             </div>
-                            <div style="font-size:0.78rem; color:#94A3B8; margin-bottom:0.75rem; line-height:1.4;">
-                                🔒 Sign in or register as a <strong>Seeker</strong> to unlock full phone contacts &amp; send instant emergency alerts.
+                            <div style="font-size:0.75rem; color:#94A3B8; margin-bottom:0.65rem; line-height:1.35; padding:6px 8px; background:rgba(15,23,42,0.6); border-radius:6px; border-left:3px solid #38BDF8;">
+                                🔒 <strong>Privacy Shield Active</strong>: Direct contact numbers are masked for public guests. Log in as a Seeker to connect with donors.
                             </div>
                             <a href="login.html?role=SEEKER&district=${encodeURIComponent(district)}" class="popup-btn">
-                                🔑 Sign In / Register to Request
+                                🔑 Sign In to Contact Donors
                             </a>
                             <a href="tel:999" class="popup-btn secondary">
                                 📞 National Emergency (999)
@@ -2372,7 +2399,7 @@
 
                 const marker = L.marker(coords, { icon })
                     .addTo(_leafletMap)
-                    .bindPopup(popupHtml, { maxWidth: 280, className: 'custom-blood-popup' });
+                    .bindPopup(popupHtml, { maxWidth: 290, className: 'custom-blood-popup' });
 
                 _mapMarkers.push(marker);
                 _markersByDistrict[district.toLowerCase()] = marker;
@@ -2387,6 +2414,20 @@
             if (!feedGrid) return;
 
             let items = [];
+
+            const maskDonorName = (name) => {
+                if (!name) return 'Verified Donor';
+                const parts = name.trim().split(' ');
+                if (parts.length === 1) return parts[0].length > 3 ? parts[0].substring(0, 3) + '***' : parts[0];
+                return parts[0] + ' ' + (parts[1] ? parts[1][0] + '***' : '');
+            };
+
+            const maskPhone = (phone) => {
+                if (!phone) return '🔒 Hidden';
+                const clean = phone.replace(/[^0-9]/g, '');
+                if (clean.length >= 8) return clean.substring(0, 3) + '****' + clean.slice(-3);
+                return '🔒 Hidden';
+            };
 
             if (_activeFeedTab === 'all' || _activeFeedTab === 'requests') {
                 _seekersData.forEach(s => {
@@ -2409,11 +2450,11 @@
                     items.push({
                         type: 'donor',
                         district: distName,
-                        title: d.full_name || 'Registered Donor',
-                        sub: `🩸 ${d.total_donations || 0} Previous Donations &bull; Ready to donate`,
+                        title: maskDonorName(d.full_name || 'Registered Donor'),
+                        sub: `🩸 ${d.total_donations || 0} Donations &bull; 🔒 Phone: ${maskPhone(d.phone)}`,
                         blood_group: d.blood_group || 'O+',
                         urgency: 'AVAILABLE',
-                        date: 'Online'
+                        date: 'Ready to Donate'
                     });
                 });
             }
