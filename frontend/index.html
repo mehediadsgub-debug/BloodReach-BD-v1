@@ -1484,7 +1484,7 @@
         </div>
 
         <!-- Mobile Hamburger Button -->
-        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Open navigation menu">
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Open navigation menu" style="display:none;">
             <span></span>
             <span></span>
             <span></span>
@@ -1492,8 +1492,8 @@
     </header>
 
     <!-- Mobile Drawer Overlay & Off-Canvas Menu -->
-    <div class="mobile-drawer-overlay" id="mobileDrawerOverlay"></div>
-    <div class="mobile-drawer" id="mobileDrawer">
+    <div class="mobile-drawer-overlay" id="mobileDrawerOverlay" style="display:none;"></div>
+    <div class="mobile-drawer" id="mobileDrawer" style="position:fixed; top:0; right:-350px;">
         <div class="mobile-drawer-header">
             <div class="brand-text">
                 <span class="brand-title" style="font-size:1.15rem;">Blood <span>Reach</span> BD</span>
@@ -1517,7 +1517,7 @@
     </div>
 
     <!-- Floating Mobile Bottom App Navigation Bar -->
-    <nav class="mobile-bottom-nav" aria-label="Mobile bottom navigation">
+    <nav class="mobile-bottom-nav" aria-label="Mobile bottom navigation" style="display:none;">
         <a href="index.html" class="mobile-nav-item active">
             <span class="mobile-nav-icon">🏠</span>
             <span class="mobile-nav-label">Home</span>

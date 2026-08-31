@@ -1,8 +1,0 @@
-{
-  "name": "bloodreach-bd",
-  "version": "1.0.0",
-  "description": "BloodReach BD — Real-Time Blood Availability & Donor Matching Platform for Bangladesh",
-  "private": true,
-  "author": "MD. MAHEDI HASAN",
-  "license": "MIT"
-}
