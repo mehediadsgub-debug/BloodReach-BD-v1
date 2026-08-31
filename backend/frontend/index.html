@@ -1571,20 +1571,20 @@
         <section class="stats-ribbon-wrapper" aria-label="Platform Statistics">
             <div class="stats-ribbon">
                 <div class="stat-item">
-                    <span class="stat-value red" id="statDonorsCount">1,450+</span>
+                    <span class="stat-value red" id="statDonorsCount">0</span>
                     <span class="stat-label">Active Donors</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-value blue" id="statDistrictsCount">64 / 64</span>
-                    <span class="stat-label">Districts Covered</span>
+                    <span class="stat-value blue" id="statRequestsCount">0</span>
+                    <span class="stat-label">Active Requests</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-value green" id="statFulfillCount">98.5%</span>
-                    <span class="stat-label">Fulfillment Rate</span>
+                    <span class="stat-value green" id="statDistrictsCount">64</span>
+                    <span class="stat-label">Districts Supported</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-value" id="statResponseTime">&lt; 15 Mins</span>
-                    <span class="stat-label">Avg Match Time</span>
+                    <span class="stat-value" id="statResponseTime">24/7</span>
+                    <span class="stat-label">Live Matching</span>
                 </div>
             </div>
         </section>
@@ -2007,7 +2007,15 @@
         }
 
         // Render Markers on Map based on filters & seeker login status
+        function updateStatsCounter() {
+            const donorsEl = document.getElementById('statDonorsCount');
+            const requestsEl = document.getElementById('statRequestsCount');
+            if (donorsEl) donorsEl.textContent = _donorsData ? _donorsData.length : 0;
+            if (requestsEl) requestsEl.textContent = _seekersData ? _seekersData.length : 0;
+        }
+
         function renderMap() {
+            updateStatsCounter();
             if (!_leafletMap) return;
             clearMarkers();
 
