@@ -199,6 +199,7 @@
     </main>
   </div>
 
+  <script src="assets/js/cloud-sync.js"></script>
   <script src="assets/js/dashboard.js"></script>
   <script>
     // ── Hospital-specific UI ─────────────────────────────────
@@ -395,6 +396,12 @@
     }
 
     async function fetchIncomingRequests() {
+      if (window.CloudSync && typeof window.CloudSync.fetchCloudData === 'function') {
+        try {
+          await window.CloudSync.fetchCloudData();
+        } catch (e) {}
+      }
+
       let localRequests = [];
       try {
         localRequests = JSON.parse(localStorage.getItem('bloodreach_requests_db') || '[]');

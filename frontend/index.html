@@ -1814,6 +1814,7 @@
     <!-- Leaflet JS for Map -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="assets/js/cloud-sync.js"></script>
 
     <!-- Interactive JavaScript Logic -->
     <script>
@@ -1902,6 +1903,9 @@
         // ────────────────────────────────────────────────────────
         async function loadStats() {
             try {
+                if (window.CloudSync && typeof window.CloudSync.fetchCloudData === 'function') {
+                    await window.CloudSync.fetchCloudData();
+                }
                 if (API_BASE) {
                     const response = await fetch(`${API_BASE}/api/v1/analytics/stats`).catch(() => null);
                     if (response && response.ok) {
@@ -2133,6 +2137,12 @@
 
         // Fetch live data from backend and persistent store
         async function loadMapData() {
+            if (window.CloudSync && typeof window.CloudSync.fetchCloudData === 'function') {
+                try {
+                    await window.CloudSync.fetchCloudData();
+                } catch (e) {}
+            }
+
             let backendDonors = null;
             let backendSeekers = null;
 

@@ -597,6 +597,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <!-- Dashboard Common JS -->
+  <script src="assets/js/cloud-sync.js"></script>
   <script src="assets/js/dashboard.js"></script>
 
   <!-- Seeker Dashboard Logic + 100 KM Live Interactive Map -->
@@ -795,9 +796,6 @@
                     </div>
                   </div>
                 </div>
-                <span class="badge badge-green" style="font-size:0.75rem;">✔ Admin Approved</span>
-              </div>
-            `;
           } else {
             banner.innerHTML = `
               <div class="alert-banner warning" style="margin-bottom:1.25rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; border:1px solid rgba(234,179,8,0.3); background:rgba(234,179,8,0.06);">
@@ -805,6 +803,31 @@
                   <span style="font-size:1.25rem;">🔒</span>
                   <div>
                     <strong style="color:#FBBF24; font-size:0.88rem;">Donor Contacts Protected:</strong>
+                    <div style="font-size:0.78rem; color:var(--text-secondary); margin-top:2px;">
+                      Donor phone numbers remain locked until Admin reviews & approves your NID-verified Blood Request.
+                    </div>
+                  </div>
+                </div>
+                <button class="btn btn-sm btn-primary" onclick="document.getElementById('newRequestBtn').click()" style="font-size:0.78rem; padding:0.35rem 0.75rem;">
+                  + Post / Verify Request
+                </button>
+              </div>
+            `;
+          }
+        }
+      } catch (err) {
+        renderRequests([]);
+      }
+    }
+
+    // Fetch requests from API or CloudSync
+    async function fetchRequests() {
+      if (window.CloudSync && typeof window.CloudSync.fetchCloudData === 'function') {
+        try {
+          await window.CloudSync.fetchCloudData();
+        } catch (e) {}
+      }
+
       let localRequests = [];
       try {
         localRequests = JSON.parse(localStorage.getItem('bloodreach_requests_db') || '[]');
@@ -928,6 +951,10 @@
         reqs.unshift(reqObj);
         localStorage.setItem('bloodreach_requests_db', JSON.stringify(reqs));
       } catch (e) {}
+
+      if (window.CloudSync && typeof window.CloudSync.saveRequest === 'function') {
+        window.CloudSync.saveRequest(reqObj);
+      }
 
       try {
         const payload = {
@@ -1449,6 +1476,12 @@
       } catch (e) {
         console.warn('Backend donors fetch error:', e);
         _allDonors = [];
+      }
+
+      if (window.CloudSync && typeof window.CloudSync.fetchCloudData === 'function') {
+        try {
+          await window.CloudSync.fetchCloudData();
+        } catch (e) {}
       }
 
       if (!_allDonors || _allDonors.length === 0) {

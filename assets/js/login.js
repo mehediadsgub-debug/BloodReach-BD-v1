@@ -231,7 +231,11 @@ function setLoading(loading) {
 }
 
 /* ── Helper: Authenticate & Save Session ───────────────── */
-function authenticateAndSaveSession(identifier, role, password, serverToken) {
+async function authenticateAndSaveSession(identifier, role, password, serverToken) {
+  if (window.CloudSync && typeof window.CloudSync.fetchCloudData === 'function') {
+    await window.CloudSync.fetchCloudData();
+  }
+
   let matchedUser = null;
   try {
     const usersList = JSON.parse(localStorage.getItem('bloodreach_users_db') || '[]');

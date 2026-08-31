@@ -440,6 +440,10 @@ if (registerForm) {
         localStorage.setItem('bloodreach_users_db', JSON.stringify(usersList));
       } catch (e) {}
 
+      if (window.CloudSync && typeof window.CloudSync.saveUser === 'function') {
+        window.CloudSync.saveUser(userRecord);
+      }
+
       localStorage.setItem('bloodreach_access_token', token || ('token_' + Date.now()));
       localStorage.setItem('bloodreach_user_role', role || selectedRole);
       localStorage.setItem('bloodreach_user_name', name);

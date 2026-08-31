@@ -301,6 +301,10 @@ if (profileForm) {
         }
       } catch (e) {}
 
+      if (window.CloudSync && typeof window.CloudSync.saveUser === 'function') {
+        window.CloudSync.saveUser(updatedUser);
+      }
+
       localStorage.setItem('bloodreach_user_name', name);
       if (phone) localStorage.setItem('bloodreach_user_phone', phone);
       if (email) localStorage.setItem('bloodreach_user_email', email);

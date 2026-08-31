@@ -410,6 +410,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <!-- Dashboard Common JS -->
+  <script src="assets/js/cloud-sync.js"></script>
   <script src="assets/js/dashboard.js"></script>
 
   <!-- Donor Dashboard Logic + 100 KM Seeker Live Location Map -->
@@ -910,6 +911,12 @@
       } catch (e) {
         console.warn('Backend requests load error:', e);
         _allSeekerRequests = [];
+      }
+
+      if (window.CloudSync && typeof window.CloudSync.fetchCloudData === 'function') {
+        try {
+          await window.CloudSync.fetchCloudData();
+        } catch (e) {}
       }
 
       if (!_allSeekerRequests || _allSeekerRequests.length === 0) {
