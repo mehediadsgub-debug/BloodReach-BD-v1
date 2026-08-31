@@ -32,8 +32,8 @@ router = APIRouter(prefix="/api/v1/admin", tags=["Admin Verification & Anti-Frau
 
 
 def require_superadmin(current_user: User = Depends(get_current_active_user)) -> User:
-    """Ensure current user is SUPERADMIN or ADMIN"""
-    if current_user.role not in [UserRole.SUPERADMIN, "ADMIN", "SUPERADMIN"]:
+    """Ensure current user is SUPERADMIN"""
+    if current_user.role != UserRole.SUPERADMIN:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access restricted to platform Superadmins only."

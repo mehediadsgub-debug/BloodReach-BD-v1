@@ -4,7 +4,7 @@ Profile management, donor profile, hospital profile.
 """
 
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
@@ -355,7 +355,7 @@ def update_my_hospital_inventory(
         db.add(inv_item)
     else:
         inv_item.units_available = payload.units_available
-        inv_item.last_updated = datetime.now()
+        inv_item.last_updated = datetime.now(timezone.utc)
         
     db.commit()
     db.refresh(inv_item)
@@ -416,7 +416,7 @@ def adjust_my_hospital_inventory(
                 detail=f"Insufficient blood units. Available: {inv_item.units_available}, Requested deduction: {abs(payload.delta_units)}."
             )
         inv_item.units_available = new_total
-        inv_item.last_updated = datetime.now()
+        inv_item.last_updated = datetime.now(timezone.utc)
 
     db.commit()
     db.refresh(inv_item)

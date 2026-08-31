@@ -9,7 +9,7 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 
-from app.models import BloodRequest, RequestMatch, MatchStatus, User, UserRole, Donor, District
+from app.models import BloodRequest, RequestMatch, MatchStatus, RequestStatus, UrgencyLevel, User, UserRole, Donor, District
 from app.services.notification_service import NotificationService
 from app.core.config import settings
 
@@ -39,14 +39,14 @@ class EscalationService:
 
         requests = self.db.query(BloodRequest).filter(
             and_(
-                BloodRequest.status.in_(["OPEN", "IN_PROGRESS"]),
+                BloodRequest.status.in_([RequestStatus.OPEN, RequestStatus.IN_PROGRESS]),
                 or_(
                     and_(
-                        BloodRequest.urgency_level == "CRITICAL",
+                        BloodRequest.urgency_level == UrgencyLevel.CRITICAL,
                         BloodRequest.created_at < critical_threshold
                     ),
                     and_(
-                        BloodRequest.urgency_level == "HIGH",
+                        BloodRequest.urgency_level == UrgencyLevel.HIGH,
                         BloodRequest.created_at < high_threshold
                     )
                 )
@@ -113,7 +113,7 @@ class EscalationService:
             self.notification_service.notify_donor_match(user.user_id, request, donor.donor_id)
 
             # SMS for critical urgency
-            if request.urgency_level == "CRITICAL" and user.phone:
+            if request.urgency_level == UrgencyLevel.CRITICAL and user.phone:
                 sent = self.notification_service.notify_donor_match_sms(user.phone, request)
                 if sent:
                     sms_count += 1

@@ -416,7 +416,7 @@ class DonationBase(BaseSchema):
 
 class DonationCreate(BaseModel):
     match_id: Optional[UUID] = None
-    donor_id: UUID
+    donor_id: Optional[UUID] = None
     request_id: Optional[UUID] = None
     hospital_id: Optional[UUID] = None
     blood_group: str = Field(..., pattern=r"^(A\+|A-|B\+|B-|AB\+|AB-|O\+|O-)$")
@@ -486,18 +486,6 @@ class AuditLogResponse(AuditLogBase):
     created_at: datetime
 
 
-# ── Division/District schemas ─────────────────────────────────
-class DivisionResponse(BaseSchema):
-    division_id: int
-    name: str
-    bn_name: Optional[str]
-
-
-class DistrictResponse(BaseSchema):
-    district_id: int
-    name: str
-    bn_name: Optional[str]
-    division_id: int
 
 
 # ── Analytics schemas ─────────────────────────────────────────

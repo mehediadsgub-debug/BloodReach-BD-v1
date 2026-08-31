@@ -185,18 +185,16 @@ class MatchingEngine:
         match.status = MatchStatus.ACCEPTED if accept else MatchStatus.REJECTED
         match.responded_at = datetime.utcnow()
         match.notes = notes
+        self.db.flush()
 
         if accept:
-            # Check how many accepted donors exist for this request
-            accepted_count = self.db.query(RequestMatch).filter(
+            # Check how many accepted donors exist for this request (including this match after flush)
+            total_accepted = self.db.query(RequestMatch).filter(
                 and_(
                     RequestMatch.request_id == blood_req.request_id,
                     RequestMatch.status == MatchStatus.ACCEPTED
                 )
             ).count()
-
-            # Include current acceptance
-            total_accepted = accepted_count + 1
 
             if total_accepted >= blood_req.units_needed:
                 blood_req.status = RequestStatus.FULFILLED

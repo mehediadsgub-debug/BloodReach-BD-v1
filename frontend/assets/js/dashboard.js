@@ -9,9 +9,9 @@
 /* ── Location Data (8 Divisions & 64 Districts) ──────── */
 const locationData = {
   "Dhaka":      ["Dhaka","Faridpur","Gazipur","Gopalganj","Kishoreganj","Madaripur","Manikganj","Munshiganj","Narayanganj","Narsingdi","Rajbari","Shariatpur","Tangail"],
-  "Chattogram": ["Bandarban","Brahmanbaria","Chandpur","Chattogram","Cox's Bazar","Feni","Khagrachhari","Lakshmipur","Noakhali","Rangamati"],
-  "Rajshahi":   ["Bogra","Joypurhat","Naogaon","Natore","Chapainawabganj","Pabna","Rajshahi","Sirajganj"],
-  "Khulna":     ["Bagerhat","Chuadanga","Jessore","Jhenaidah","Khulna","Kushtia","Magura","Meherpur","Narail","Satkhira"],
+  "Chattogram": ["Bandarban","Brahmanbaria","Chandpur","Chattogram","Cox's Bazar","Cumilla","Feni","Khagrachhari","Lakshmipur","Noakhali","Rangamati"],
+  "Rajshahi":   ["Bogura","Joypurhat","Naogaon","Natore","Chapainawabganj","Pabna","Rajshahi","Sirajganj"],
+  "Khulna":     ["Bagerhat","Chuadanga","Jashore","Jhenaidah","Khulna","Kushtia","Magura","Meherpur","Narail","Satkhira"],
   "Barishal":   ["Barguna","Barishal","Bhola","Jhalokati","Patuakhali","Pirojpur"],
   "Sylhet":     ["Habiganj","Moulvibazar","Sunamganj","Sylhet"],
   "Rangpur":    ["Dinajpur","Gaibandha","Kurigram","Lalmonirhat","Nilphamari","Panchagarh","Rangpur","Thakurgaon"],
@@ -128,8 +128,11 @@ window.API_BASE = (() => {
   if (typeof window === 'undefined') return 'http://localhost:8000';
   if (window.location.protocol === 'file:') return 'http://localhost:8000';
   if (window.location.port === '8000') return '';
-  const protocol = window.location.protocol || 'http:';
   const hostname = window.location.hostname || 'localhost';
+  if (hostname.includes('vercel.app') || hostname.includes('netlify.app') || hostname.includes('github.io')) {
+    return '';
+  }
+  const protocol = window.location.protocol || 'http:';
   return `${protocol}//${hostname}:8000`;
 })();
 
@@ -399,6 +402,7 @@ document.addEventListener('keydown', e => {
 /* ── Real-Time WebSockets & Live Toast Notifications ─────────── */
 let _wsSocket = null;
 let _wsReconnectTimer = null;
+let _wsPingInterval = null;
 
 function playNotificationChime() {
   try {
@@ -510,6 +514,10 @@ function initRealtimeWebSocket() {
     };
 
     _wsSocket.onclose = () => {
+      if (_wsPingInterval) {
+        clearInterval(_wsPingInterval);
+        _wsPingInterval = null;
+      }
       // Reconnect after 5 seconds
       if (!_wsReconnectTimer) {
         _wsReconnectTimer = setTimeout(initRealtimeWebSocket, 5000);
@@ -521,7 +529,8 @@ function initRealtimeWebSocket() {
     };
 
     // Periodic heartbeat ping every 25 seconds
-    setInterval(() => {
+    if (_wsPingInterval) clearInterval(_wsPingInterval);
+    _wsPingInterval = setInterval(() => {
       if (_wsSocket && _wsSocket.readyState === WebSocket.OPEN) {
         _wsSocket.send('ping');
       }

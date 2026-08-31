@@ -7,6 +7,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from sqlalchemy.orm import Session
 from app.core.database import SessionLocal
+from app.services.escalation_service import run_escalation_job
 import os
 import time
 import tempfile
