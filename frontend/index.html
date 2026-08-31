@@ -1894,21 +1894,20 @@
         // ────────────────────────────────────────────────────────
         async function loadStats() {
             try {
-                const response = await fetch(`${API_BASE}/api/v1/analytics/stats`);
-                if (response.ok) {
+                const response = await fetch(`${API_BASE}/api/v1/analytics/stats`).catch(() => null);
+                if (response && response.ok) {
                     const stats = await response.json();
-                    if (stats.total_donors && document.getElementById('statDonorsCount')) {
-                        document.getElementById('statDonorsCount').textContent = stats.total_donors.toLocaleString() + '+';
+                    if (document.getElementById('statDonorsCount')) {
+                        document.getElementById('statDonorsCount').textContent = stats.total_donors || 0;
                     }
-                    if (stats.districts_covered && document.getElementById('statDistrictsCount')) {
-                        document.getElementById('statDistrictsCount').textContent = `${stats.districts_covered} / 64`;
+                    if (document.getElementById('statRequestsCount')) {
+                        document.getElementById('statRequestsCount').textContent = stats.active_requests || 0;
                     }
-                    if (stats.fulfillment_rate && document.getElementById('statFulfillCount')) {
-                        document.getElementById('statFulfillCount').textContent = `${stats.fulfillment_rate}%`;
-                    }
+                } else {
+                    updateStatsCounter();
                 }
             } catch (e) {
-                // Fallback realistic values are already present in HTML
+                updateStatsCounter();
             }
         }
         loadStats();
