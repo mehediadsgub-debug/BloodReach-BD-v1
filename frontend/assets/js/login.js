@@ -1,10 +1,23 @@
 /**
  * Blood Reach BD — Login Page JavaScript
- * Handles: role selection, form validation, password toggle,
- *           animated background, JWT-ready submit flow
+ * Handles: role selection, authentication form validation, FastAPI login endpoint integration,
+ *           fast timeout resolution, and instant Demo session fallback on Vercel & offline.
  */
 
 'use strict';
+
+/* ── Dynamic API Base (Auto-detects localhost, LAN/WiFi IP, or instant Demo mode on Vercel) ── */
+function getApiBase() {
+  if (typeof window === 'undefined') return 'http://localhost:8000';
+  if (window.location.protocol === 'file:') return 'http://localhost:8000';
+  if (window.location.port === '8000') return '';
+  const hostname = window.location.hostname || 'localhost';
+  if (hostname.includes('vercel.app') || hostname.includes('netlify.app') || hostname.includes('github.io')) {
+    return null; // Cloud static deployment: instant demo fallback without timeout delay
+  }
+  const protocol = window.location.protocol || 'http:';
+  return `${protocol}//${hostname}:8000`;
+}
 
 /* ── DOM References ────────────────────────────────────── */
 const bgParticles = document.getElementById('bgParticles');
@@ -14,11 +27,12 @@ const loginForm = document.getElementById('loginForm');
 const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
 const togglePwdBtn = document.getElementById('togglePassword');
-const eyeIcon = document.getElementById('eyeIcon');
+const eyeIcon = document.getElementById('passwordEyeIcon');
+const rememberMe = document.getElementById('rememberMe');
 const submitBtn = document.getElementById('submitBtn');
 const btnText = document.getElementById('btnText');
 const btnLoader = document.getElementById('btnLoader');
-const btnArrow = submitBtn.querySelector('.btn-arrow');
+const btnArrow = submitBtn ? submitBtn.querySelector('.btn-arrow') : null;
 const alertBanner = document.getElementById('alertBanner');
 const alertIcon = document.getElementById('alertIcon');
 const alertMsg = document.getElementById('alertMsg');
@@ -26,7 +40,6 @@ const emailError = document.getElementById('emailError');
 const passwordError = document.getElementById('passwordError');
 const groupEmail = document.getElementById('groupEmail');
 const groupPassword = document.getElementById('groupPassword');
-const rememberMe = document.getElementById('rememberMe');
 
 /* ── State ─────────────────────────────────────────────── */
 let selectedRole = 'DONOR';
@@ -34,54 +47,73 @@ let isSubmitting = false;
 
 /* ── Animated Background ───────────────────────────────── */
 (function createBackground() {
-  // Floating particles
-  for (let i = 0; i < 14; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
-    const size = 60 + Math.random() * 120;
-    p.style.cssText = `
-      width:${size}px; height:${size}px;
-      left:${Math.random() * 100}%;
-      top:${Math.random() * 100}%;
-      --dur:${10 + Math.random() * 14}s;
-      --delay:${-Math.random() * 12}s;
-      --opacity:${0.15 + Math.random() * 0.3};
-    `;
-    bgParticles.appendChild(p);
+  if (bgParticles) {
+    for (let i = 0; i < 14; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const size = 60 + Math.random() * 120;
+      p.style.cssText = `
+        width:${size}px; height:${size}px;
+        left:${Math.random() * 100}%;
+        top:${Math.random() * 100}%;
+        --dur:${10 + Math.random() * 14}s;
+        --delay:${-Math.random() * 12}s;
+        --opacity:${0.15 + Math.random() * 0.3};
+      `;
+      bgParticles.appendChild(p);
+    }
   }
 
-  // Floating blood drop SVGs
-  const dropSVG = (size, x, y, dur, delay) => {
-    const el = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    el.setAttribute('viewBox', '0 0 60 80');
-    el.setAttribute('width', size);
-    el.setAttribute('height', size * 1.33);
-    el.classList.add('drop-float');
-    el.style.cssText = `position:absolute;left:${x}%;top:${y}%;--dur:${dur}s;--delay:${delay}s;`;
-    el.innerHTML = `<path d="M30 2 C30 2 4 32 4 50 C4 65.46 15.54 77 30 77 C44.46 77 56 65.46 56 50 C56 32 30 2 30 2Z" fill="#E53935"/>`;
-    floatingDrops.appendChild(el);
-  };
+  if (floatingDrops) {
+    const dropSVG = (size, x, y, dur, delay) => {
+      const el = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      el.setAttribute('viewBox', '0 0 60 80');
+      el.setAttribute('width', size);
+      el.setAttribute('height', size * 1.33);
+      el.classList.add('drop-float');
+      el.style.cssText = `position:absolute;left:${x}%;top:${y}%;--dur:${dur}s;--delay:${delay}s;`;
+      el.innerHTML = `<path d="M30 2 C30 2 4 32 4 50 C4 65.46 15.54 77 30 77 C44.46 77 56 65.46 56 50 C56 32 30 2 30 2Z" fill="#E53935"/>`;
+      floatingDrops.appendChild(el);
+    };
 
-  const drops = [
-    [90, 5, 15, 20, 0],
-    [50, 92, 60, 25, -5],
-    [70, 12, 75, 18, -3],
-    [40, 80, 10, 22, -8],
-    [110, 50, 40, 30, -2],
-    [60, 30, 85, 17, -6],
-  ];
+    const drops = [
+      [90, 5, 15, 20, 0],
+      [50, 92, 60, 25, -5],
+      [70, 12, 75, 18, -3],
+      [40, 80, 10, 22, -8],
+      [110, 50, 40, 30, -2],
+      [60, 30, 85, 17, -6],
+    ];
 
-  drops.forEach(([sz, x, y, dur, delay]) => dropSVG(sz, x, y, dur, delay));
+    drops.forEach(([sz, x, y, dur, delay]) => dropSVG(sz, x, y, dur, delay));
+  }
 })();
 
 /* ── Role Switching Helper ─────────────────────────────── */
 function setRole(role) {
-  selectedRole = role;
+  let normalized = (role || 'DONOR').toUpperCase();
+  if (normalized === 'ADMIN') normalized = 'SUPERADMIN';
+  if (normalized === 'HOSPITAL') normalized = 'HOSPITAL_ADMIN';
+
+  selectedRole = normalized;
   roleTabs.forEach(t => {
-    const isCurrent = t.dataset.role === role;
+    const tabRole = (t.dataset.role || '').toUpperCase();
+    const isCurrent = tabRole === normalized || (tabRole === 'SUPERADMIN' && normalized === 'ADMIN') || (tabRole === 'HOSPITAL_ADMIN' && normalized === 'HOSPITAL');
     t.classList.toggle('active', isCurrent);
     t.setAttribute('aria-pressed', isCurrent ? 'true' : 'false');
   });
+
+  const roleDescMap = {
+    DONOR: 'Access donor requests, update availability status, and track donation impact.',
+    SEEKER: 'Post urgent blood requests, track nearby matches, and connect with donors.',
+    HOSPITAL_ADMIN: 'Manage hospital blood stock inventory and emergency hospital requests.',
+    SUPERADMIN: 'Platform verification, dispute resolution, and national blood network overview.'
+  };
+
+  const roleDescEl = document.getElementById('roleDesc');
+  if (roleDescEl && roleDescMap[selectedRole]) {
+    roleDescEl.textContent = roleDescMap[selectedRole];
+  }
 }
 
 /* ── Role Tab Selection ────────────────────────────────── */
@@ -89,7 +121,7 @@ roleTabs.forEach(tab => {
   tab.addEventListener('click', () => {
     setRole(tab.dataset.role);
 
-    // Animate the tab
+    // Animate tab
     tab.style.transform = 'scale(0.95)';
     requestAnimationFrame(() => {
       tab.style.transform = '';
@@ -106,22 +138,19 @@ roleTabs.forEach(tab => {
 
   if (roleParam === 'SEEKER' || isEmergency) {
     setRole('SEEKER');
+  } else if (roleParam === 'HOSPITAL' || roleParam === 'HOSPITAL_ADMIN') {
+    setRole('HOSPITAL_ADMIN');
   } else if (roleParam === 'ADMIN' || roleParam === 'SUPERADMIN') {
     setRole('SUPERADMIN');
   } else if (roleParam === 'DONOR') {
     setRole('DONOR');
   }
 
-  // If emergency request mode, display emergency alert banner and update register link
   if (isEmergency) {
-    const emergencyAlertBanner = document.getElementById('emergencyAlertBanner');
-    if (emergencyAlertBanner) {
-      emergencyAlertBanner.hidden = false;
-    }
-    const registerLink = document.getElementById('registerLink');
-    if (registerLink) {
-      registerLink.href = 'register.html?role=seeker&emergency=1';
-    }
+    const emergencyBanner = document.getElementById('emergencyAlertBanner');
+    if (emergencyBanner) emergencyBanner.hidden = false;
+    const titleEl = document.getElementById('formTitle');
+    if (titleEl) titleEl.innerHTML = '🚨 Emergency Seeker Login';
   }
 })();
 
@@ -135,29 +164,32 @@ const EYE_CLOSED = `
   <line x1="1" y1="1" x2="23" y2="23"/>
 `;
 
-togglePwdBtn.addEventListener('click', () => {
-  const isHidden = passwordInput.type === 'password';
-  passwordInput.type = isHidden ? 'text' : 'password';
-  eyeIcon.innerHTML = isHidden ? EYE_CLOSED : EYE_OPEN;
-  togglePwdBtn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
-});
+if (togglePwdBtn && passwordInput && eyeIcon) {
+  togglePwdBtn.addEventListener('click', () => {
+    const isHidden = passwordInput.type === 'password';
+    passwordInput.type = isHidden ? 'text' : 'password';
+    eyeIcon.innerHTML = isHidden ? EYE_CLOSED : EYE_OPEN;
+    togglePwdBtn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+  });
+}
 
 /* ── Validation Helpers ────────────────────────────────── */
 function validateEmail(value) {
-  if (!value.trim()) return 'Email address is required.';
-  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-  const isPhone = /^\+?[0-9]{7,15}$/.test(value);
+  if (!value || !value.trim()) return 'Email address or Mobile number is required.';
+  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+  const isPhone = /^\+?[0-9]{7,15}$/.test(value.replace(/[\s\-\(\)]/g, ''));
   if (!isEmail && !isPhone) return 'Enter a valid email address or mobile number.';
   return '';
 }
 
 function validatePassword(value) {
   if (!value) return 'Password is required.';
-  if (value.length < 6) return 'Password must be at least 6 characters.';
+  if (value.length < 4) return 'Password must be at least 4 characters.';
   return '';
 }
 
 function setFieldError(groupEl, errorEl, inputEl, msg) {
+  if (!groupEl || !errorEl || !inputEl) return;
   errorEl.textContent = msg;
   if (msg) {
     groupEl.classList.add('has-error');
@@ -176,13 +208,15 @@ function clearFieldErrors() {
 
 /* ── Alert Banner ─────────────────────────────────────── */
 function showAlert(type, msg) {
+  if (!alertBanner) return;
   alertBanner.hidden = false;
   alertBanner.className = `alert-banner ${type}`;
-  alertIcon.textContent = type === 'error' ? '⚠️' : '✅';
-  alertMsg.textContent = msg;
+  if (alertIcon) alertIcon.textContent = type === 'error' ? '⚠️' : '✅';
+  if (alertMsg) alertMsg.textContent = msg;
 }
 
 function hideAlert() {
+  if (!alertBanner) return;
   alertBanner.hidden = true;
   alertBanner.className = 'alert-banner';
 }
@@ -190,195 +224,145 @@ function hideAlert() {
 /* ── Loading State ─────────────────────────────────────── */
 function setLoading(loading) {
   isSubmitting = loading;
-  submitBtn.disabled = loading;
-  btnText.hidden = loading;
-  btnArrow.hidden = loading;
-  btnLoader.hidden = !loading;
+  if (submitBtn) submitBtn.disabled = loading;
+  if (btnText) btnText.hidden = loading;
+  if (btnArrow) btnArrow.hidden = loading;
+  if (btnLoader) btnLoader.hidden = !loading;
 }
 
-/* ── Form Submit ───────────────────────────────────────── */
-loginForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  if (isSubmitting) return;
+/* ── Helper: Demo Session Fallback ─────────────────────── */
+function executeDemoLogin(identifier, role) {
+  const storage = rememberMe && rememberMe.checked ? localStorage : sessionStorage;
+  storage.setItem('bloodreach_access_token', 'demo-token-' + Date.now());
+  storage.setItem('bloodreach_user_role', role);
+  const cleanName = identifier.includes('@') ? identifier.split('@')[0] : identifier;
+  storage.setItem('bloodreach_user_name', cleanName || `Demo ${role.charAt(0) + role.slice(1).toLowerCase()}`);
 
-  clearFieldErrors();
+  showAlert('success', `⚡ Demo Session active! Redirecting to ${role} dashboard...`);
 
-  const email = emailInput.value.trim();
-  const password = passwordInput.value;
-
-  const emailErr = validateEmail(email);
-  const passErr = validatePassword(password);
-
-  if (emailErr) setFieldError(groupEmail, emailError, emailInput, emailErr);
-  if (passErr) setFieldError(groupPassword, passwordError, passwordInput, passErr);
-
-  if (emailErr || passErr) return;
-
-  setLoading(true);
-
-  try {
-    const payload = {
-      email,
-      password,
-      role: selectedRole,
-    };
-
-    // ── API Call (FastAPI backend) ──
-    const getApiBase = () => {
-      if (typeof window === 'undefined') return 'http://localhost:8000';
-      if (window.location.protocol === 'file:') return 'http://localhost:8000';
-      if (window.location.port === '8000') return '';
-      const protocol = window.location.protocol || 'http:';
-      const hostname = window.location.hostname || 'localhost';
-      return `${protocol}//${hostname}:8000`;
-    };
-    const API_BASE = getApiBase();
-    const response = await fetch(`${API_BASE}/api/v1/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      let message = 'Invalid credentials. Please try again.';
-      if (typeof data?.detail === 'string') {
-        message = data.detail;
-      } else if (Array.isArray(data?.detail)) {
-        message = data.detail.map(d => d.msg || d.message || JSON.stringify(d)).join('; ');
-      } else if (data?.message) {
-        message = data.message;
-      }
-      showAlert('error', message);
-      setLoading(false);
-      return;
-    }
-
-    // Store JWT token
-    const storage = rememberMe.checked ? localStorage : sessionStorage;
-    storage.setItem('bloodreach_access_token', data.access_token);
-    storage.setItem('bloodreach_user_role', data.role || selectedRole);
-    storage.setItem('bloodreach_user_name', data.full_name || data.name || '');
-
-    showAlert('success', `Welcome back! Redirecting to your dashboard...`);
-
-    // Redirect after short delay
-    setTimeout(() => {
-      const dashboardMap = {
-        DONOR: 'dashboard-donor.html',
-        SEEKER: 'dashboard-seeker.html',
-        HOSPITAL_ADMIN: 'dashboard-hospital.html',
-        SUPERADMIN: 'dashboard-admin.html',
-      };
-      const isEmergency = new URLSearchParams(window.location.search).get('emergency') === '1'
-        || new URLSearchParams(window.location.search).get('emergency') === 'true'
-        || new URLSearchParams(window.location.search).get('urgent') === '1';
-
-      const userRole = data.role || selectedRole;
-      if (userRole === 'SEEKER' && isEmergency) {
-        window.location.href = 'dashboard-seeker.html?emergency=1';
-      } else {
-        window.location.href = dashboardMap[userRole] || 'index.html';
-      }
-    }, 1400);
-
-  } catch (err) {
-    // Network / server unreachable (e.g. static preview on Vercel)
-    const isNetworkError = err instanceof TypeError || !navigator.onLine;
-    if (isNetworkError) {
-      // Create seamless demo session so visitors can explore all dashboards
-      const storage = rememberMe.checked ? localStorage : sessionStorage;
-      storage.setItem('bloodreach_access_token', 'demo-token-' + Date.now());
-      storage.setItem('bloodreach_user_role', selectedRole);
-      storage.setItem('bloodreach_user_name', `Demo ${selectedRole.charAt(0) + selectedRole.slice(1).toLowerCase()}`);
-      
-      showAlert('success', `⚡ Demo Mode active! Redirecting to ${selectedRole} dashboard...`);
-      setTimeout(() => {
-        const dashboardMap = {
-          DONOR: 'dashboard-donor.html',
-          SEEKER: 'dashboard-seeker.html',
-          HOSPITAL: 'dashboard-hospital.html',
-          HOSPITAL_ADMIN: 'dashboard-hospital.html',
-          SUPERADMIN: 'dashboard-admin.html',
-          ADMIN: 'dashboard-admin.html'
-        };
-        window.location.href = dashboardMap[selectedRole] || 'dashboard-donor.html';
-      }, 1000);
-      return;
-    }
-    showAlert('error', 'An unexpected error occurred. Please try again.');
-    setLoading(false);
-  }
-});
-
-/* ── Real-time Field Validation (on blur) ─────────────── */
-emailInput.addEventListener('blur', () => {
-  const err = validateEmail(emailInput.value);
-  setFieldError(groupEmail, emailError, emailInput, err);
-});
-
-passwordInput.addEventListener('blur', () => {
-  const err = validatePassword(passwordInput.value);
-  setFieldError(groupPassword, passwordError, passwordInput, err);
-});
-
-emailInput.addEventListener('input', () => {
-  if (groupEmail.classList.contains('has-error') && validateEmail(emailInput.value) === '') {
-    setFieldError(groupEmail, emailError, emailInput, '');
-  }
-});
-
-passwordInput.addEventListener('input', () => {
-  if (groupPassword.classList.contains('has-error') && validatePassword(passwordInput.value) === '') {
-    setFieldError(groupPassword, passwordError, passwordInput, '');
-  }
-});
-
-/* ── Pre-fill from Storage (Remember Me) ──────────────── */
-(function prefill() {
-  const storedEmail = localStorage.getItem('bloodreach_remembered_email');
-  if (storedEmail) {
-    emailInput.value = storedEmail;
-    rememberMe.checked = true;
-  }
-})();
-
-rememberMe.addEventListener('change', () => {
-  if (rememberMe.checked && emailInput.value.trim()) {
-    localStorage.setItem('bloodreach_remembered_email', emailInput.value.trim());
-  } else {
-    localStorage.removeItem('bloodreach_remembered_email');
-  }
-});
-
-/* ── Already Logged In? Redirect ──────────────────────── */
-(function checkExistingSession() {
-  const token = localStorage.getItem('bloodreach_access_token')
-    || sessionStorage.getItem('bloodreach_access_token');
-  const role = localStorage.getItem('bloodreach_user_role')
-    || sessionStorage.getItem('bloodreach_user_role');
-
-  if (token && role) {
+  setTimeout(() => {
     const dashboardMap = {
       DONOR: 'dashboard-donor.html',
       SEEKER: 'dashboard-seeker.html',
       HOSPITAL_ADMIN: 'dashboard-hospital.html',
+      HOSPITAL: 'dashboard-hospital.html',
       SUPERADMIN: 'dashboard-admin.html',
+      ADMIN: 'dashboard-admin.html',
     };
-    // Silently redirect if a valid session exists
-    // window.location.href = dashboardMap[role] || 'index.html';
-    // NOTE: Commented out to allow testing the login page directly.
-    // Uncomment when backend is connected.
-  }
-})();
+    const isEmergency = new URLSearchParams(window.location.search).get('emergency') === '1'
+      || new URLSearchParams(window.location.search).get('emergency') === 'true'
+      || new URLSearchParams(window.location.search).get('urgent') === '1';
 
-/* ── Keyboard Shortcut: Enter on Role Tab ────────────── */
-roleTabs.forEach(tab => {
-  tab.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      tab.click();
+    if (role === 'SEEKER' && isEmergency) {
+      window.location.href = 'dashboard-seeker.html?emergency=1';
+    } else {
+      window.location.href = dashboardMap[role] || 'index.html';
+    }
+  }, 800);
+}
+
+/* ── Form Submit ───────────────────────────────────────── */
+if (loginForm) {
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+
+    clearFieldErrors();
+
+    const email = emailInput ? emailInput.value.trim() : '';
+    const password = passwordInput ? passwordInput.value : '';
+
+    const emailErr = validateEmail(email);
+    const passErr = validatePassword(password);
+
+    if (emailErr) setFieldError(groupEmail, emailError, emailInput, emailErr);
+    if (passErr) setFieldError(groupPassword, passwordError, passwordInput, passErr);
+
+    if (emailErr || passErr) return;
+
+    setLoading(true);
+
+    const API_BASE = getApiBase();
+
+    // If on Vercel or cloud static hosting where no FastAPI backend is configured
+    if (!API_BASE) {
+      executeDemoLogin(email, selectedRole);
+      return;
+    }
+
+    try {
+      const payload = {
+        email,
+        password,
+        role: selectedRole,
+      };
+
+      // Abort controller to prevent infinite spinner if backend is unresponsive
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+      const response = await fetch(`${API_BASE}/api/v1/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+      const data = await response.json();
+
+      if (!response.ok) {
+        let message = 'Invalid credentials. Please check your username and password.';
+        if (typeof data?.detail === 'string') {
+          message = data.detail;
+        } else if (Array.isArray(data?.detail)) {
+          message = data.detail.map(d => d.msg || d.message || JSON.stringify(d)).join('; ');
+        } else if (data?.message) {
+          message = data.message;
+        }
+        showAlert('error', message);
+        setLoading(false);
+        return;
+      }
+
+      // Store JWT token
+      const storage = rememberMe && rememberMe.checked ? localStorage : sessionStorage;
+      storage.setItem('bloodreach_access_token', data.access_token);
+      storage.setItem('bloodreach_user_role', data.role || selectedRole);
+      storage.setItem('bloodreach_user_name', data.full_name || data.name || email);
+
+      showAlert('success', `Welcome back! Redirecting to your dashboard...`);
+
+      setTimeout(() => {
+        const dashboardMap = {
+          DONOR: 'dashboard-donor.html',
+          SEEKER: 'dashboard-seeker.html',
+          HOSPITAL_ADMIN: 'dashboard-hospital.html',
+          SUPERADMIN: 'dashboard-admin.html',
+        };
+        const isEmergency = new URLSearchParams(window.location.search).get('emergency') === '1'
+          || new URLSearchParams(window.location.search).get('emergency') === 'true'
+          || new URLSearchParams(window.location.search).get('urgent') === '1';
+
+        const userRole = data.role || selectedRole;
+        if (userRole === 'SEEKER' && isEmergency) {
+          window.location.href = 'dashboard-seeker.html?emergency=1';
+        } else {
+          window.location.href = dashboardMap[userRole] || 'index.html';
+        }
+      }, 1000);
+
+    } catch (err) {
+      // Abort / Network error / offline -> fallback immediately
+      executeDemoLogin(email, selectedRole);
     }
   });
-});
+}
+
+/* ── Real-time Field Validation (on blur) ─────────────── */
+if (emailInput) {
+  emailInput.addEventListener('blur', () => {
+    const err = validateEmail(emailInput.value);
+    setFieldError(groupEmail, emailError, emailInput, err);
+  });
+}

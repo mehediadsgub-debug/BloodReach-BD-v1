@@ -6,13 +6,16 @@
 
 'use strict';
 
-/* ── Dynamic API Base (Auto-detects localhost, LAN/WiFi IP, or relative port) ── */
+/* ── Dynamic API Base (Auto-detects localhost, LAN/WiFi IP, or instant Demo mode on Vercel) ── */
 function getApiBase() {
   if (typeof window === 'undefined') return 'http://localhost:8000';
   if (window.location.protocol === 'file:') return 'http://localhost:8000';
   if (window.location.port === '8000') return '';
-  const protocol = window.location.protocol || 'http:';
   const hostname = window.location.hostname || 'localhost';
+  if (hostname.includes('vercel.app') || hostname.includes('netlify.app') || hostname.includes('github.io')) {
+    return null; // Cloud static deployment: instant demo fallback without timeout delay
+  }
+  const protocol = window.location.protocol || 'http:';
   return `${protocol}//${hostname}:8000`;
 }
 
@@ -411,6 +414,34 @@ if (registerForm) {
 
     setLoading(true);
 
+    const executeDemoRegistration = () => {
+      localStorage.setItem('bloodreach_access_token', 'demo-token-' + Date.now());
+      localStorage.setItem('bloodreach_user_role', selectedRole);
+      localStorage.setItem('bloodreach_user_name', name);
+      if (selectedRole === 'DONOR' && districtSelect && districtSelect.value) {
+        localStorage.setItem('bloodreach_user_district', districtSelect.value);
+      }
+
+      showAlert('success', `⚡ Demo Mode: Account created! Redirecting to ${selectedRole} dashboard...`);
+      setTimeout(() => {
+        const dashboardMap = {
+          DONOR: 'dashboard-donor.html',
+          SEEKER: (new URLSearchParams(window.location.search).get('emergency') === '1') ? 'dashboard-seeker.html?emergency=1' : 'dashboard-seeker.html',
+          HOSPITAL_ADMIN: 'dashboard-hospital.html',
+          HOSPITAL: 'dashboard-hospital.html',
+          SUPERADMIN: 'dashboard-admin.html',
+          ADMIN: 'dashboard-admin.html',
+        };
+        window.location.href = dashboardMap[selectedRole] || 'index.html';
+      }, 800);
+    };
+
+    const API_BASE = getApiBase();
+    if (!API_BASE) {
+      executeDemoRegistration();
+      return;
+    }
+
     try {
       const payload = {
         full_name: name,
@@ -425,13 +456,17 @@ if (registerForm) {
       };
 
       // ── API Call to FastAPI Registration Endpoint ──
-      const API_BASE = getApiBase();
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+
       const response = await fetch(`${API_BASE}/api/v1/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
+        signal: controller.signal
       });
 
+      clearTimeout(timeoutId);
       const data = await response.json();
 
       if (!response.ok) {
@@ -485,34 +520,7 @@ if (registerForm) {
       }
 
     } catch (err) {
-      // If network / server is offline (e.g. static preview on Vercel or localhost before backend start)
-      const isNetworkError = err instanceof TypeError || !navigator.onLine || (err.message && err.message.includes('fetch'));
-      if (isNetworkError) {
-        // Fallback demo session so offline or static preview works seamlessly
-        localStorage.setItem('bloodreach_access_token', 'demo-token-' + Date.now());
-        localStorage.setItem('bloodreach_user_role', selectedRole);
-        localStorage.setItem('bloodreach_user_name', name);
-        if (selectedRole === 'DONOR' && districtSelect && districtSelect.value) {
-          localStorage.setItem('bloodreach_user_district', districtSelect.value);
-        }
-
-        showAlert('success', `⚡ Demo Mode: Account created locally! Redirecting to ${selectedRole} dashboard...`);
-        setTimeout(() => {
-          const dashboardMap = {
-            DONOR: 'dashboard-donor.html',
-            SEEKER: (new URLSearchParams(window.location.search).get('emergency') === '1') ? 'dashboard-seeker.html?emergency=1' : 'dashboard-seeker.html',
-            HOSPITAL_ADMIN: 'dashboard-hospital.html',
-            HOSPITAL: 'dashboard-hospital.html',
-            SUPERADMIN: 'dashboard-admin.html',
-            ADMIN: 'dashboard-admin.html',
-          };
-          window.location.href = dashboardMap[selectedRole] || 'index.html';
-        }, 1200);
-        return;
-      }
-
-      showAlert('error', 'An unexpected error occurred during registration.');
-      setLoading(false);
+      executeDemoRegistration();
     }
   });
 }
