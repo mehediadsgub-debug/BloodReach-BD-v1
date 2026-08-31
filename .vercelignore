@@ -1,8 +1,0 @@
-backend/
-docs/
-.venv/
-venv/
-*.bat
-*.ps1
-run_backend.py
-test.txt
